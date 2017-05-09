@@ -1,7 +1,18 @@
 <!doctype html>
 <html lang="en">
 <html>
-	<script type="text/javascript" src="phone.js"></script>
+<head>
+	<script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
+	<script src="phone.js"></script>
+</head>
+
+<body>
+	Enter Name: <input type="text" id="name"></input><button onclick="setName();">Set</button><br>
+	Status: <span id="status">Load</span>
+	<br><br>
+	<button id="buzz" onclick="buzz();">Buzz!</button>
+
+</body>
 
 
 </html>

@@ -10,27 +10,25 @@
 firebase.initializeApp(config);
 
 var gameRef = firebase.database().ref("games/game1");
-var gameState = "reset";
+
+function doReady() {
+	gameRef.set({"gameState":"ready"});
+};
+
+function doReset() {
+	gameRef.child("gameState").set("reset");
+	gameRef.child("buzz").set(null);
+	document.getElementById('buzzer') = "";
+};
+
+var gameState = "load";
 var user = null;
 var userName = "";
 
 
-function setName() {	
-	userName = document.getElementById("name").value;
-	gameRef.child("users").child(user.uid).set(userName);
-}
-
-function buzz() {
-	if(gameState === 'ready') {
-		gameRef.child("buzz").push(
-			{"user": userName,
-			 "time": firebase.database.ServerValue.TIMESTAMP});
-	}
-};
-
 firebase.auth().onAuthStateChanged(function(u) {
 	if(u) {
-		user = u;	
+		user = u;		
 	}
 });
 
@@ -44,5 +42,10 @@ firebase.auth().signInAnonymously().catch(function(error) {
 gameRef.child("gameState").on('value', function(snap){
 	document.getElementById("status").textContent = snap.val();
 	gameState = snap.val();
+});
+
+gameRef.child("buzz").on('child_added', function(snap) {
+	var div = document.getElementById('buzzer');
+	div.innerHTML = div.innerHTML + "<br>" + snap.val().user + " buzzed in";
 });
 
