@@ -1,0 +1,83 @@
+body {
+  font: 14px system-ui, Helvetica, sans-serif;
+  font-weight: normal;
+  margin: 20px;
+}
+
+ol, ul {
+  padding-left: 20px;
+}
+
+ul li:first-of-type {
+    list-style: none;
+    margin-left: -1.5em;
+}
+
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 14px;
+  width: 100px;
+  height: 80px;
+  margin-right: -1px;
+  margin-left: -1px;
+  font-weight: bold;
+  padding: 3px;
+  text-align: center;
+  /*width: 34px;*/
+}
+
+.container {
+  display: flex;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.host-control {
+  border: 1px solid #999;
+  margin-left: 10px;
+  padding: 5px;
+  width: 300px;  
+}
+
+.host-question {
+  border: 1px solid #999;
+  padding: 2px;
+  margin-bottom: 10px;  
+}
+
+button.display-pick {
+  margin-top: 5px;
+}
+
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}

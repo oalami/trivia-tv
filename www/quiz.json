@@ -1,0 +1,62 @@
+[
+    {
+        "category": "Cities",
+        "items": {
+            "100": "This coastal city serves as the summer home of the 41st President of the United States",
+            "200": "This city is home to the first Tower Records store, which opened in 1960",
+            "300": "The words \"California Republic\" were first raised on a flag in this city as part of the \"Bear Flag Revolt\" in 1846",
+            "400": "The Italian sandwich was invented in this Maine city in 1903",
+            "500": "During Prohibition, the mayor of this city, known as the \"Napolean of Temperance\", was raided, an event known as the Rum Riot"
+        }
+    },
+    {
+        "category": "The Great Outdoors",
+        "items": {
+            "100": "Opened in 1879, this building is the oldest in Golden Gate Park",
+            "200": "This floral visitor is the state insect of Maine",
+            "300": "This company began in 1912 by selling a single product, the Maine Hunting Shoe ",
+            "400": "This Tahoe resort is the largest ski area in California",
+            "500": "The name of this National Park means \"killer\" in Miwok"
+        }
+    },
+    {
+        "category": "Potent Potables",
+        "items": {
+            "100": "This Portland, ME brewery distributes nationally and focuses on Belgian-style beers",
+            "200": "The chardonnay from this winery won first prize in the \"Judgement of Paris\" wine tasting in 1976",
+            "300": "The largest brewer in Maine, this brewing company produces beers such as Island Time IPA, Monkey Fist IPA, and Little Horror of Hops",
+            "400": "This Sonoma winery is the oldest commercial winery in California",
+            "500": "The slogan for this Bay Area brewery is \"celebrate the right to be original\""
+        }
+    },
+    {
+        "category": "CA, ME, or Neither",
+        "items": {
+            "100": "This state has the most forest cover (89%) in the US",
+            "200": "\"Ladies night\" is against the law in this state",
+            "300": "This state has the longest coastline in the contiguous United States",
+            "400": "This state has the highest percentage of people speaking French at home",
+            "500": "This state is the first in the nation to use \"instant run-off\" (also known as \"ranked-choice voting\") for statewide elections"
+        }
+    },
+    {
+        "category": "Regions and Landmarks",
+        "items": {
+            "100": "The Guinness Book of World Records named this bridge for being the widest in the world ",
+            "200": "\"Firebelle Lil\" was the benefactor for the construction of this San Francisco landmark",
+            "300": "This California island is known as \"Ellis Island West\", serving as an entry point for immigrants from East Asia",
+            "400": "Machias Seal Island and North Rock are disputed territories claimed by Maine, USA and this region of Canada",
+            "500": "A colony of New France, this area included parts of Quebec and modern-day Maine"
+        }
+    },
+    {
+        "category": "Potpourri",
+        "items": {
+            "100": "This California state motto is the Greek word for \"I found it!\"",
+            "200": "This American author of horror and supernatual fiction has homes in Bangor and Lovell, Maine",
+            "300": "The owner of Chez Panisse, this chef and restauranteur helped define California cuisine",
+            "400": "This variety of thistle plant is the  state vegetable of California",
+            "500": "Following World War II, Maine produced over 75 billion of these small pointed pieces of wood each year"
+        }
+    }
+]

@@ -17,12 +17,12 @@ var userName = "";
 
 function setName() {	
 	userName = document.getElementById("name").value;
-	gameRef.child("users").child(user.uid).set(userName);
+	gameRef.child("players").child(user.uid).set(userName);
 }
 
 function buzz() {
-	if(gameState === 'ready') {
-		gameRef.child("buzz").push(
+	if(gameState === 'BUZZ_READY') {
+		gameRef.child("buzzes").push(
 			{"user": userName,
 			 "time": firebase.database.ServerValue.TIMESTAMP});
 	}
