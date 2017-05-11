@@ -1,7 +1,7 @@
 {
-  "name": "minimal-react-starter",
-  "version": "0.0.5",
-  "description": "Minimal react starter project",
+  "name": "tv-quiz",
+  "version": "0.0.1",
+  "description": "A in-person quiz game with mobile comtrolers.",
   "main": "src/index.js",
   "scripts": {
     "compile": "webpack",

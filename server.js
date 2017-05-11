@@ -9,14 +9,14 @@ const compiler = webpack(webpackConfig);
 app.use(webpackDevMiddleware(compiler, {
   hot: true,
   filename: 'bundle.js',
-  publicPath: '/',
+  publicPath: '/js',
   stats: {
     colors: true,
   },
   historyApiFallback: true,
 }));
 
-app.use(express.static(__dirname + '/www'));
+app.use(express.static(__dirname + '/public'));
 
 const server = app.listen(3000, function() {
   const host = server.address().address;

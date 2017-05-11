@@ -8,7 +8,7 @@ module.exports = {
     host: './host.js'
   },
   output: {
-    path: path.join(__dirname, 'www'),
+    path: path.join(__dirname, 'public/js'),
     filename: '[name]-bundle.js',
   },
   module: {
