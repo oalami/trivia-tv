@@ -63,7 +63,7 @@ class BuzzerScreen extends React.Component {
 		let score = this.props.score | 0
 		return (
 			<div className={"content " + className} onClick={this.props.onClick}>
-				<h1 className="team-name">{this.props.name} - {score} points</h1>
+				<h1 className="team-name">{this.props.name}: {score} points</h1>
 
 				<div className="message">
 					<h1>{text}</h1>

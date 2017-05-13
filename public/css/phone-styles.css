@@ -1,10 +1,7 @@
 
 @font-face {
     font-family: 'Silom';
-    src:url('Silom.ttf.woff') format('woff'),
-        url('Silom.ttf.svg#Silom') format('svg'),
-        url('Silom.ttf.eot'),
-        url('Silom.ttf.eot?#iefix') format('embedded-opentype'); 
+    src:url('Silom.ttf.svg#Silom') format('svg'),
     font-weight: normal;
     font-style: normal;
 }
