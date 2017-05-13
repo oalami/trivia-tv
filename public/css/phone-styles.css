@@ -1,0 +1,137 @@
+
+@font-face {
+    font-family: 'Silom';
+    src:url('Silom.ttf.woff') format('woff'),
+        url('Silom.ttf.svg#Silom') format('svg'),
+        url('Silom.ttf.eot'),
+        url('Silom.ttf.eot?#iefix') format('embedded-opentype'); 
+    font-weight: normal;
+    font-style: normal;
+}
+
+.buzz {
+  background-color: #51E3C2;
+  color: #4048CC;
+}
+
+.ready {
+  background-color: #FECA0A;  
+  color: #4048CC;
+}
+
+.waiting {
+
+}
+
+body, html{
+	background-color:#4048CC;
+	color: #FFC90A;
+	font-family: 'Silom';
+}
+
+input{
+  font-size:18px;
+  padding:10px 10px 10px 5px;
+  display:block;
+  width:300px;
+  border:none;
+  border-bottom:1px solid #757575;
+}
+
+.content {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;  
+  top: 0;
+  left: 0;
+}
+
+.team-name {
+  color: white;
+  padding-top: 30px;
+}
+
+.message {
+  height: 100%;
+  width: 100%;
+}
+
+h1 {
+  height: 100px;
+  width: 100%;
+  font-size: 22px;
+  line-height: 150%;
+  border-radius: 3px 3px 0 0;
+  text-align: center;  
+}
+
+.message > h1 {
+  position: relative;
+  top: 35%;
+  transform: translateY(-65%); 
+  font-size: 26px;
+
+}
+
+form {
+  box-sizing: border-box;
+  width: 260px;
+  margin: 100px auto 0;
+  padding-bottom: 40px;
+  border-radius: 3px;
+}
+
+h2{
+	width: 100%;
+	font-size: 18px;
+	text-align: center;
+}
+
+input {
+  margin: 40px 25px;
+  width: 200px;
+  display: block;
+  border: none;
+  padding: 10px 0;
+  border-bottom: solid 1px #FFC90A;
+  -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+          transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+  background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 96%, #FFC90A 4%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 96%, #FFC90A 4%);
+  background-position: -200px 0;
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  color: #ffffff;
+  font-family: 'Silom';
+}
+input:focus, input:valid {
+  box-shadow: none;
+  outline: none;
+  background-position: 0 0;
+}
+
+button {
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 6px;
+  width: 200px;
+  color: #4048CC;
+  margin-left: 25px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.2);
+  font-family: 'Silom';
+  font-size: 14px;
+}
+
+button:hover {
+  -webkit-transform: translateY(-3px);
+      -ms-transform: translateY(-3px);
+          transform: translateY(-3px);
+  box-shadow: 0 6px 6px 0 rgba(0, 0,);
+  }
+    
+
+
+
+

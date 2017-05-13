@@ -13,10 +13,6 @@ var firebaseConfig = {
 
 Firebase.initializeApp(firebaseConfig); 
 
-Firebase.auth().onAuthStateChanged(function(user) {
-  console.log('firebase auth state changed');
-});
-
 Firebase.auth().signInAnonymously().catch(function(error) {
   // Handle Errors here.
   var errorCode = error.code;
@@ -94,6 +90,19 @@ class Board extends React.Component {
   )}
 }
 
+class BuzzListItem extends React.Component {  
+  render() {
+    let disable = this.props.buzzer.disabled;
+
+    return (
+      <div className="buzz-item">{this.props.buzzer.name}
+          <button className="win-lose" onClick={this.props.onWin} disabled={disable}>WIN</button>
+          <button className="win-lose" onClick={this.props.onLose} disabled={disable}>LOSE</button>
+      </div>
+    );
+  }
+}
+
 class Host extends React.Component {
   constructor() {
     super();
@@ -103,7 +112,8 @@ class Host extends React.Component {
       status: "loading",
       players: [],
       selectedQuestion: null,
-      picks: []
+      picks: [],
+      buzzes: []
     };
   }
 
@@ -112,20 +122,47 @@ class Host extends React.Component {
   		this.setState({allowBuzz: snap.val()})
   	});
 
-    gameRef.child('players').on('value', snap => {
-      let players = [];
-      snap.forEach((child_snap) => {
-        players.push({uid: child_snap.key, name: child_snap.val()});
-      });
+    gameRef.child('players').on('child_added', snap => {
+      let players = this.state.players.slice();
+      let p = snap.val();
+      
+      players.push({id: snap.key, name: p.name, score:p.score});
             
       this.setState({players: players});
+    });
+
+    gameRef.child('players').on('child_removed', snap => {
+      let players = this.state.players.slice();
+      let p = snap.val();      
+
+      let index = players.indexOf(p);
+      players.splice(index, 1);
+
+      this.setState({players: players});
+    });
+
+    gameRef.child('players').on('child_changed', snap => {
+      let players = this.state.players.slice();
+      let p = snap.val();      
+
+      for(var i = 0; players.length ; i++) {
+        if(players[i].id == snap.key) {
+          players[i].score = p.score;
+          players[i].name = p.name;
+          this.setState({players: players});
+          return;
+        }
+      }      
     });
 
     gameRef.child('board').once('value', snap => {
       this.setState({board: snap.val()});
 
       gameRef.child('gameState').on('value', snap => {      
-        this.setState({status: snap.val()});
+        let state = {};
+        state.status = snap.val();
+
+        this.setState(state);
       });
 
       gameRef.child('picks').limitToLast(1).once('child_added', snap => {
@@ -138,17 +175,33 @@ class Host extends React.Component {
 
       picks.push(snap.val());
       this.setState({picks: picks});
-    })
+    });
+
+    gameRef.child('picks').on('child_removed', snap => {      
+      this.setState({picks: []});
+    });
 
     gameRef.child('buzzes').on('child_added', snap => {
-      if(this.state.status == 'BUZZ_READY') {
-        gameRef.child('gameState').set("BUZZED");
-      }
+      let buzzes = this.state.buzzes.slice();
+      buzzes.push(snap.val());
+
+      this.setState({buzzes: buzzes});
+    });    
+
+    gameRef.child('buzzes').on('child_removed', snap => {
+      this.setState({buzzes: []});
     });
   }
 
   componentWillUnmount() {
     gameRef.off();
+  }
+
+  nextQuestion() {
+      this.setState({selectedQuestion: null});
+
+      gameRef.child('buzzes').remove( _ => {})
+      gameRef.child('gameState').set("WAITING_PICK");
   }
 
   getSelectedQuestionFromKey(key) {
@@ -163,6 +216,14 @@ class Host extends React.Component {
     selectedQuestion.text = this.state.board[col].items[val];
 
     return selectedQuestion;
+  }
+
+  getPlayerById(id) {
+    for(var i = 0 ; i < this.state.players.length; i++) {
+      if(this.state.players[i].id == id) {
+        return this.state.players[i];
+      }      
+    }    
   }
 
   handleStartGame() {
@@ -195,12 +256,8 @@ class Host extends React.Component {
     let skip = confirm('Really Skip?');
 
     if(skip) {
-      this.setState({selectedQuestion: null});
-
-      gameRef.child('buzzes').remove( _ => {})
-      gameRef.child('gameState').set("WAITING_PICK");
+      nextQuestion();
     }
-
   }
 
   handleSquareClick(key) {
@@ -210,6 +267,37 @@ class Host extends React.Component {
 
     this.setState({selectedQuestion: this.getSelectedQuestionFromKey(key)})
   }  
+
+  handleWin(buzzer) {
+    let buzzes = this.state.buzzes.slice();
+    let index = buzzes.indexOf(buzzer);
+    buzzer.disabled = true;
+    buzzes[index] = buzzer;
+
+    this.setState({buzzes: buzzes})
+
+    let p = this.getPlayerById(buzzer.id);
+    let currentScore = p.score ? parseInt(p.score) : 0;
+
+    gameRef.child('players').child(buzzer.id).child('score').set(currentScore + parseInt(this.state.selectedQuestion.value))
+
+    this.nextQuestion();
+  }
+
+
+  handleLose(buzzer) {
+    let buzzes = this.state.buzzes.slice();
+    let index = buzzes.indexOf(buzzer);
+    buzzer.disabled = true;
+    buzzes[index] = buzzer;
+
+    this.setState({buzzes: buzzes})
+
+    let p = this.getPlayerById(buzzer.id);
+    let currentScore = p.score ? parseInt(p.score) : 0;
+
+    gameRef.child('players').child(buzzer.id).child('score').set(currentScore - parseInt(this.state.selectedQuestion.value))    
+  }
 
   renderSelectedQuestion() {
     if(this.state.selectedQuestion === null) {
@@ -222,11 +310,37 @@ class Host extends React.Component {
           <span>{this.state.selectedQuestion.text}</span>
           <br/>
           <button className="display-pick" onClick={_ => this.handleDisplayPick(this.state.selectedQuestion.key)} disabled={this.state.status != "WAITING_PICK"}>Display Question</button>
-          <button className="display-pick" onClick={_ => this.handleSkipPick(this.state.selectedQuestion.key)} disabled={this.state.status != "BUZZ_READY" && this.state.status != "BUZZED"}>Skip</button>
+          <button className="display-pick" onClick={_ => this.handleSkipPick(this.state.selectedQuestion.key)} disabled={this.state.status != "BUZZ_READY"}>Skip</button>
         </div>
       );
     }
   }  
+
+  renderBuzzersList() {
+    if(this.state.status == 'BUZZ_READY') {
+      if( this.state.buzzes.length == 0) {
+        return (
+          <div className="host-question">
+            <span className="bold">Buzzers</span>
+            <br/>No Buzzers
+          </div>
+        );
+      } else { 
+        return (
+          <div className="host-question">
+          <span className="bold">Buzzers</span>
+          { this.state.buzzes.map(buzzer => { 
+            return (<BuzzListItem buzzer={buzzer} 
+              key={buzzer.id}
+              onWin={_ => this.handleWin(buzzer)}
+              onLose={_ => this.handleLose(buzzer)}
+              />)
+          })}
+          </div>
+        );
+      }
+    }
+  }
 
   render() {
   	let allowBuzz = this.state.allowBuzz;
@@ -249,13 +363,15 @@ class Host extends React.Component {
             <div>
               <ul>
                 <li>Players: </li>           
-                 {this.state.players.length == 0 ? (<li>No players</li>) : this.state.players.map((player) => (<li key={player.uid}>{player.name}</li>)) }
+                 {this.state.players.length == 0 ? (<li>No players</li>) : this.state.players.map((player) => (<li key={player.id}>{player.name}: {player.score}</li>)) }
               </ul>        
             </div>
 
             <div className="host-question">
               {this.renderSelectedQuestion()}
             </div>
+
+            {this.renderBuzzersList()}
       		</div>
       	</div>
     );

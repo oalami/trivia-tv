@@ -4,7 +4,7 @@ module.exports = {
   context: path.join(__dirname, 'src'),
   entry: {
     tv: './tv.js',
-    buzzer: './buzzer.js',
+    phone: './phone.js',
     host: './host.js'
   },
   output: {

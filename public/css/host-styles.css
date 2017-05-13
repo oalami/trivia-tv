@@ -60,6 +60,14 @@ ul li:first-of-type {
   margin-bottom: 10px;  
 }
 
+.buzz-item {
+  margin-top: 6px
+}
+
+button.win-lose {
+  margin-left: 3px;
+}
+
 button.display-pick {
   margin-top: 5px;
 }
