@@ -48,7 +48,7 @@ class Row extends React.Component {
     } else {
       return (
        <div className="board-row">
-          {this.props.row.map( (item) => { return (<Square text={item.displayText} key={item.displayText}/>) } )}
+          {this.props.row.map( (item) => { return (<Square text={item.displayText} key={item.key}/>) } )}
         </div>
       )
     }
@@ -107,7 +107,6 @@ class Host extends React.Component {
   constructor() {
     super();
     this.state = {
-      allowBuzz: false,
       board: [],
       status: "loading",
       players: [],
@@ -118,10 +117,6 @@ class Host extends React.Component {
   }
 
   componentWillMount() {
-  	gameRef.child('allowBuzz').on('value', snap => {
-  		this.setState({allowBuzz: snap.val()})
-  	});
-
     gameRef.child('players').on('child_added', snap => {
       let players = this.state.players.slice();
       let p = snap.val();
@@ -343,8 +338,6 @@ class Host extends React.Component {
   }
 
   render() {
-  	let allowBuzz = this.state.allowBuzz;
-
     let enableStartGame = (this.state.status === "NEW" || this.state.status === "ENDED")
 
 

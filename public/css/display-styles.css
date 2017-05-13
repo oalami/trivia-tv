@@ -1,0 +1,279 @@
+
+@font-face {
+    font-family: 'Silom';
+    src:url('Silom.ttf.svg#Silom') format('svg'),
+    font-weight: normal;
+    font-style: normal;
+}
+
+.buzz {
+  background-color: #51E3C2;
+  color: #4048CC;
+}
+
+.ready {
+  background-color: #FECA0A;  
+  color: #4048CC;
+}
+
+.waiting {
+
+}
+
+body, html{
+	background-color:#4048CC;
+	color: #FFC90A;
+	font-family: 'Silom';
+}
+
+input{
+  font-size:18px;
+  padding:10px 10px 10px 5px;
+  display:block;
+  width:300px;
+  border:none;
+  border-bottom:1px solid #757575;
+}
+
+.phone-content {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;  
+  top: 0;
+  left: 0;
+}
+
+.tv-content {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;  
+  top: 0;
+  left: 0;
+  background-color: black;  
+}
+
+.display-item-parent {
+  display: table;
+  border-spacing: 40px;
+  height: 774px;
+  width: 1092px;  
+  float: left;
+}
+
+.display-item {
+  text-transform: uppercase;
+  margin: auto;
+  font-size: 60px;  
+  font-weight: normal;
+  font-family: "Times New Roman", "Georgia", serif;
+  color: white;
+  text-align: center;
+  display: table-cell;
+  background-color: #4048CC;  
+  padding: 50px;
+  /*position: relative;*/
+  /*width:100%;*/
+  vertical-align: middle;
+  letter-spacing: 1px;
+
+}
+
+.display-item > div {
+
+}
+
+.team-name {
+  color: white;
+  padding-top: 30px;
+}
+
+.message {
+  height: 100%;
+  width: 100%;
+}
+
+h1 {
+  height: 100px;
+  width: 100%;
+  font-size: 22px;
+  line-height: 150%;
+  border-radius: 3px 3px 0 0;
+  text-align: center;  
+}
+
+.message > h1 {
+  position: relative;
+  top: 30%;
+  transform: translateY(-70%); 
+  font-size: 26px;
+
+}
+
+form {
+  box-sizing: border-box;
+  width: 260px;
+  margin: 100px auto 0;
+  padding-bottom: 40px;
+  border-radius: 3px;
+}
+
+.game {
+  display: inline-block;
+}
+
+.board {
+  display: table;
+  /*margin: auto;  */
+}
+
+.board-row {
+  display: table-row;
+}
+
+
+.board-cell {
+  margin: 8px;
+  background-color: #4048CC;
+  border: none;
+  float: left;
+  font-size: 34px;
+  width: 160px;
+  height: 105px;  
+  font-weight: bold;
+  padding: 3px;
+  text-align: center;
+  vertical-align: middle;
+  display: table-cell;  
+}
+
+.board-cell > span {
+  position: relative;
+  top: 35px;
+}
+
+.board-row.header > .board-cell {
+  font-size: 22px;
+  margin-bottom: 20px;    
+}
+
+.board-row.header > .board-cell > span{
+  top: 15px;
+}
+
+.player-list {
+  /*width: 100%;*/
+  margin-top: 82px;
+  text-align: center;
+  display: inline-block;
+  float: right;
+}
+
+.player-box {
+  border: 1px solid #4048CC;
+  width: 200px;
+  height: 120px;
+  margin: 20px;
+  font-size: 18px;  
+  font-weight: normal;
+  font-family: "Times New Roman", "Georgia", serif;
+  color: #4048CC;
+  position: relative;
+}
+
+.player-name.buzzed {
+  background-color: #51E3C2;
+  color: #4048CC;
+}
+
+.player-box.buzzed {
+  border: 1px solid #51E3C2;
+}
+
+.player-box-header {  
+  width: 200px;
+  /*height: 120px;*/
+  margin: 20px;
+  font-size: 22px;  
+  font-weight: normal;
+  font-family: "Times New Roman", "Georgia", serif;
+  color: white;
+  position: relative;
+}
+
+
+.player-name {
+  padding: 10px;  
+  /*border: 1px solid #4048CC;*/
+  width: 180px;
+  /*margin: 20px;*/
+  font-size: 20px;  
+  font-weight: normal;
+  /*font-family: "Times New Roman", "Georgia", serif;*/
+  color: white;
+  background-color: #4048CC;
+  position: relative;  
+}
+
+.player-score {
+  position: absolute;
+  bottom: 15px;
+  width: 100%;
+  font-size: 20px;
+  color: white;
+}
+
+
+/*.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}*/
+
+input {
+  margin: 40px 25px;
+  width: 200px;
+  display: block;
+  border: none;
+  padding: 10px 0;
+  border-bottom: solid 1px #FFC90A;
+  -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+          transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+  background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 96%, #FFC90A 4%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 96%, #FFC90A 4%);
+  background-position: -200px 0;
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  color: #ffffff;
+  font-family: 'Silom';
+}
+input:focus, input:valid {
+  box-shadow: none;
+  outline: none;
+  background-position: 0 0;
+}
+
+button {
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 6px;
+  width: 200px;
+  color: #4048CC;
+  margin-left: 25px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.2);
+  font-family: 'Silom';
+  font-size: 14px;
+}
+
+button:hover {
+  -webkit-transform: translateY(-3px);
+      -ms-transform: translateY(-3px);
+          transform: translateY(-3px);
+  box-shadow: 0 6px 6px 0 rgba(0, 0,);
+  }
+    
+
+
+
+

@@ -5,7 +5,7 @@ module.exports = {
   entry: {
     tv: './tv.js',
     phone: './phone.js',
-    host: './host.js'
+    host: './host.js',
   },
   output: {
     path: path.join(__dirname, 'public/js'),

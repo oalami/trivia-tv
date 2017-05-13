@@ -62,7 +62,7 @@ class BuzzerScreen extends React.Component {
 
 		let score = this.props.score | 0
 		return (
-			<div className={"content " + className} onClick={this.props.onClick}>
+			<div className={"phone-content " + className} onClick={this.props.onClick}>
 				<h1 className="team-name">{this.props.name}: {score} points</h1>
 
 				<div className="message">
@@ -93,7 +93,7 @@ class NameEntryScreen extends React.Component {
 
 	render() {
 		return (
-			<div className="content">
+			<div className="phone-content">
 			<form onSubmit={this.handlePlayButtonClick}>
   				<h1>MAINE & CALIFORNIA<br/>JEOPARDY</h1>
   				<h2>Enter Team Name:</h2>

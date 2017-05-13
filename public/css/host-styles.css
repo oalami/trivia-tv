@@ -9,8 +9,8 @@ ol, ul {
 }
 
 ul li:first-of-type {
-    list-style: none;
-    margin-left: -1.5em;
+  list-style: none;
+  margin-left: -1.5em;
 }
 
 
