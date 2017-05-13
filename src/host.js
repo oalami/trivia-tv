@@ -230,12 +230,12 @@ class Host extends React.Component {
     let enableStartGame = (this.state.status === "NEW" || this.state.status === "ENDED")
     if(enableStartGame) {      
       gameRef.child('gameState').set("WAITING_PICK");
-    } else {
-      gameRef.child('picks').remove(_ => {});
-      gameRef.child('players').remove(_ => {});
-      gameRef.child('buzzes').remove(_ => {});       
+    } else {     
       let reset = confirm('Reset Game?');
       if(reset) {
+        gameRef.child('picks').remove(_ => {});
+        gameRef.child('players').remove(_ => {});
+        gameRef.child('buzzes').remove(_ => {});          
         gameRef.child('gameState').set("NEW");
       }
     }
@@ -256,7 +256,7 @@ class Host extends React.Component {
     let skip = confirm('Really Skip?');
 
     if(skip) {
-      nextQuestion();
+      this.nextQuestion();
     }
   }
 

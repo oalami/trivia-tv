@@ -67,8 +67,8 @@ h1 {
 
 .message > h1 {
   position: relative;
-  top: 35%;
-  transform: translateY(-65%); 
+  top: 30%;
+  transform: translateY(-70%); 
   font-size: 26px;
 
 }
