@@ -1,3 +1,9 @@
+Triva TV Game
+---------
+A trivia party game, designed to be played on a TV with mobile phones as the player buzzers. 
+Built with React and Firebase.
+
+
 Game State
 ----------
 - NEW: Game Hasn't Started
@@ -6,6 +12,5 @@ Game State
 - DISPLAY_PICK: Question Picked
 - BUZZ_READY: Question Picked, Ready for Buzzing or Question Picked, Player Has Buzzed
 - ENDED: Game Over
-
 
 NEW -> STARTED -> WAITING_PICK -> DISPLAY_PICK -> BUZZ_READY -> WAITING_PICK ... -> ENDED
