@@ -1,6 +1,6 @@
 {
   "name": "tv-quiz",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A in-person quiz game with mobile comtrolers.",
   "main": "src/index.js",
   "scripts": {
@@ -8,16 +8,19 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "babel-core": "^6.24.1",
-    "babel-loader": "^6.4.1",
-    "babel-preset-env": "^1.4.0",
-    "babel-preset-react": "^6.24.1",
     "express": "^4.15.2",
     "firebase": "^3.9.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
-    "reactfire": "^1.0.0",
-    "webpack": "^2.4.1",
-    "webpack-dev-middleware": "^1.10.1"
+    "reactfire": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
+    "@babel/preset-react": "^7.24.1",
+    "babel-loader": "^9",
+    "webpack": "^5",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-middleware": "^7"
   }
 }
