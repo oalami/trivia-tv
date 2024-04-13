@@ -19,5 +19,5 @@ export const init = function() {
       console.log(errorMessage + " " +errorCode);
     });
 
-    return firebase.database().ref("games/game1")
+    return firebase.database().ref("games/game4")
 } 

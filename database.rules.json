@@ -1,6 +1,24 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
+    "games" : {
+      "$game" : {
+   		 	".read": "auth != null",
+        "board" : {
+          ".write": "false"
+        },
+        "gameState" : {
+        	".write": "auth != null"
+        },
+        "players" : {
+        	".write": "auth != null"
+        },
+        "picks" : {
+          ".write": "auth != null"
+        },
+        "buzzes" : {
+          ".write": "auth != null"          
+        }
+    	}
+    }
   }
 }

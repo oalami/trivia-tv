@@ -30,7 +30,7 @@ function auth() {
 
 auth();
 
-var gameRef = Firebase.database().ref("games/game1");
+var gameRef = Firebase.database().ref("games/game4");
 
 document.addEventListener('DOMContentLoaded', function() {
   ReactDOM.render(
@@ -95,7 +95,7 @@ class NameEntryScreen extends React.Component {
 		return (
 			<div className="phone-content">
 			<form onSubmit={this.handlePlayButtonClick}>
-  				<h1>MAINE & CALIFORNIA<br/>JEOPARDY</h1>
+  				<h1>CLIMATE JEOPARDY</h1>
   				<h2>Enter Team Name:</h2>
   				<input type="text" defaultValue={this.props.name} ref={c => this._input = c}/>
 				<button>Let's Play</button>
