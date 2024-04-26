@@ -12,9 +12,21 @@ var firebaseConfig = {
 };
 
 var firebaseUser = null;
+var needRefresh = false;
 
 function auth() {
 	Firebase.initializeApp(firebaseConfig); Firebase.auth().onAuthStateChanged(user => {  		
+		if(user != null) {
+			console.log("Auth state changed " +  user.uid);
+			if(needRefresh) {
+				window.location.reload();
+			}
+		} else {
+			needRefresh = true;
+			console.log("Auth state changed NULL" );
+		}
+
+
   		firebaseUser = user;
 	});
 
