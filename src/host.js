@@ -21,7 +21,7 @@ Firebase.auth().signInAnonymously().catch(function(error) {
   console.log(errorMessage);
 });
 
-var gameRef = Firebase.database().ref("games/game4");
+var gameRef = Firebase.database().ref("games/game5");
 
 
 

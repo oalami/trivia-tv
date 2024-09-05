@@ -1,86 +1,90 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Firebase from 'firebase'
+import React from "react";
+import ReactDOM from "react-dom";
+import Firebase from "firebase";
 
 var firebaseConfig = {
-    apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
-    authDomain: "tvquiz-92dd4.firebaseapp.com",
-    databaseURL: "https://tvquiz-92dd4.firebaseio.com",
-    projectId: "tvquiz-92dd4",
-    storageBucket: "tvquiz-92dd4.appspot.com",
-    messagingSenderId: "946323037907"
+	apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
+	authDomain: "tvquiz-92dd4.firebaseapp.com",
+	databaseURL: "https://tvquiz-92dd4.firebaseio.com",
+	projectId: "tvquiz-92dd4",
+	storageBucket: "tvquiz-92dd4.appspot.com",
+	messagingSenderId: "946323037907",
 };
 
 var firebaseUser = null;
 var needRefresh = false;
 
 function auth() {
-	Firebase.initializeApp(firebaseConfig); Firebase.auth().onAuthStateChanged(user => {  		
-		if(user != null) {
-			console.log("Auth state changed " +  user.uid);
-			if(needRefresh) {
+	Firebase.initializeApp(firebaseConfig);
+	Firebase.auth().onAuthStateChanged((user) => {
+		if (user != null) {
+			console.log("Auth state changed " + user.uid);
+			if (needRefresh) {
 				window.location.reload();
 			}
 		} else {
 			needRefresh = true;
-			console.log("Auth state changed NULL" );
+			console.log("Auth state changed NULL");
 		}
 
-
-  		firebaseUser = user;
+		firebaseUser = user;
 	});
 
+	Firebase.auth()
+		.signInAnonymously()
+		.catch(function (error) {
+			// Handle Errors here.
+			var errorCode = error.code;
+			var errorMessage = error.message;
 
-	Firebase.auth().signInAnonymously().catch(function(error) {
-	  // Handle Errors here.
-	  var errorCode = error.code;
-	  var errorMessage = error.message;
-	  
-	  console.log(errorMessage);
-	});
+			console.log(errorMessage);
+		});
 }
 
 auth();
 
-var gameRef = Firebase.database().ref("games/game4");
+var gameRef = Firebase.database().ref("games/game5");
 
-document.addEventListener('DOMContentLoaded', function() {
-  ReactDOM.render(
-    React.createElement(PlayerControler),
-    document.getElementById('mount')
-  );
+document.addEventListener("DOMContentLoaded", function () {
+	ReactDOM.render(
+		React.createElement(PlayerControler),
+		document.getElementById("mount"),
+	);
 });
-
 
 class BuzzerScreen extends React.Component {
 	render() {
-		let text = "Waiting for question";
-		let className = "waiting"
+		let text = "Waiting for answer";
+		let className = "waiting";
 
-		switch(this.props.status) {
+		switch (this.props.status) {
 			case "BUZZ_READY":
-				if(this.props.sentBuzz) {
-					text = "BUZZZZZZZZZZ"
-					className = "buzz"
+				if (this.props.sentBuzz) {
+					text = "BUZZZZZZZZZZ";
+					className = "buzz";
 				} else {
-					text = "CLICK TO BUZZ"
-					className = "ready"
-				}				
+					text = "CLICK TO BUZZ";
+					className = "ready";
+				}
 				break;
 			case "DISPLAY_PICK":
-				text = "GET READY"
-				className = "waiting"
+				text = "GET READY";
+				className = "waiting";
 		}
 
-		let score = this.props.score | 0
+		let score = this.props.score | 0;
 		return (
-			<div className={"phone-content " + className} onClick={this.props.onClick}>
-				<h1 className="team-name">{this.props.name}: {score} points</h1>
+			<div
+				className={"phone-content " + className}
+				onClick={this.props.onClick}
+			>
+				<h1 className="team-name">
+					{this.props.name}: {score} points
+				</h1>
 
 				<div className="message">
 					<h1>{text}</h1>
 				</div>
-
 			</div>
 		);
 	}
@@ -95,28 +99,30 @@ class NameEntryScreen extends React.Component {
 	handlePlayButtonClick(e) {
 		e.preventDefault();
 
-		if(this._input.value != "") {
+		if (this._input.value != "") {
 			this.props.onNamePicked(this._input.value);
 		} else {
 			//TODO: Visual indicator that player name required
 		}
-		
 	}
 
 	render() {
 		return (
 			<div className="phone-content">
-			<form onSubmit={this.handlePlayButtonClick}>
-  				<h1>CLIMATE JEOPARDY</h1>
-  				<h2>Enter Team Name:</h2>
-  				<input type="text" defaultValue={this.props.name} ref={c => this._input = c}/>
-				<button>Let's Play</button>
-			</form>
+				<form onSubmit={this.handlePlayButtonClick}>
+					<h1>MERCHANTXP JEOPARDY</h1>
+					<h2>Enter Team Name:</h2>
+					<input
+						type="text"
+						defaultValue={this.props.name}
+						ref={(c) => (this._input = c)}
+					/>
+					<button>Let's Play</button>
+				</form>
 			</div>
-		)		
+		);
 	}
 }
-
 
 class PlayerControler extends React.Component {
 	constructor() {
@@ -124,10 +130,10 @@ class PlayerControler extends React.Component {
 		this.state = {
 			playerName: "",
 			playerScore: 0,
-			status: 'loading',
-			playerId: null,		
+			status: "loading",
+			playerId: null,
 			nameSet: false,
-			sentBuzz: false
+			sentBuzz: false,
 		};
 
 		this.handleNamePicked = this.handleNamePicked.bind(this);
@@ -136,82 +142,99 @@ class PlayerControler extends React.Component {
 	componentWillMount() {
 		let cookieId = 0;
 
-  		if(document.cookie) {
-  			let uid = document.cookie.split("=")[1];
-  			cookieId = uid;
-  		}  		
+		if (document.cookie) {
+			let uid = document.cookie.split("=")[1];
+			cookieId = uid;
+		}
 
-		gameRef.child('players').once('value', snapList => {
-			let player = {playerName: "", playerId: null};
-			
-			snapList.forEach(snap => {
-				if(cookieId == snap.key) {
-					player = {playerId: snap.key, playerName: snap.val().name, playerScore: snap.val().score};
+		gameRef.child("players").once("value", (snapList) => {
+			let player = { playerName: "", playerId: null };
+
+			snapList.forEach((snap) => {
+				if (cookieId == snap.key) {
+					player = {
+						playerId: snap.key,
+						playerName: snap.val().name,
+						playerScore: snap.val().score,
+					};
 				}
 			});
 
 			this.setState(player);
 		});
 
-		gameRef.child('players').on('child_changed', snap => {
+		gameRef.child("players").on("child_changed", (snap) => {
 			let p = snap.val();
-			if(this.state.playerId && this.state.playerId == snap.key) {
-				this.setState({playerName: p.name, playerScore: p.score});
+			if (this.state.playerId && this.state.playerId == snap.key) {
+				this.setState({ playerName: p.name, playerScore: p.score });
 			}
-		})
+		});
 
-		gameRef.child('gameState').on('value', snap => {      
-			let state = {}
+		gameRef.child("gameState").on("value", (snap) => {
+			let state = {};
 			state.status = snap.val();
-			if(this.state.status != 'loading' && state.status == 'NEW' && this.state.nameSet) {
+			if (
+				this.state.status != "loading" &&
+				state.status == "NEW" &&
+				this.state.nameSet
+			) {
 				state.nameSet = false;
-			} 
+			}
 
-			if(state.status != "BUZZ_READY") {
+			if (state.status != "BUZZ_READY") {
 				state.sentBuzz = false;
 			}
 
-        	this.setState(state);
-    	});
+			this.setState(state);
+		});
 	}
 
 	handleNamePicked(name) {
 		let playerId = this.state.playerId;
 
-		if(playerId != null) {
-			gameRef.child('players').child(playerId).set({name: name});
+		if (playerId != null) {
+			gameRef.child("players").child(playerId).set({ name: name });
 		} else {
-			playerId = gameRef.child('players').push({name: name}).key;
+			playerId = gameRef.child("players").push({ name: name }).key;
 
 			document.cookie = "playerId=" + playerId;
 		}
 
-		this.setState({playerId: playerId, playerName: name, nameSet: true});
+		this.setState({ playerId: playerId, playerName: name, nameSet: true });
 	}
 
 	handleBuzzClick() {
-		if(!this.state.sentBuzz && this.state.status == "BUZZ_READY") {
-			gameRef.child('buzzes').push({name: this.state.playerName, id:this.state.playerId})
-			this.setState({sentBuzz: true})
+		if (!this.state.sentBuzz && this.state.status == "BUZZ_READY") {
+			gameRef
+				.child("buzzes")
+				.push({ name: this.state.playerName, id: this.state.playerId });
+			this.setState({ sentBuzz: true });
 		}
-	}	
+	}
 
 	render() {
-		if(this.state.status == 'loading') {
-			return (<h1>Loading Please Wait</h1>)
-		} else if(!this.state.nameSet && (this.state.status == 'NEW' || this.state.playerName == "")) {
-			return ( <NameEntryScreen onNamePicked={this.handleNamePicked} name={this.state.playerName}/> );
-		} else {
-			return ( 
-				<BuzzerScreen status={this.state.status} 
-					sentBuzz={this.state.sentBuzz} 
-					score={this.state.playerScore} 
+		if (this.state.status == "loading") {
+			return <h1>Loading Please Wait</h1>;
+		} else if (
+			!this.state.nameSet &&
+			(this.state.status == "NEW" || this.state.playerName == "")
+		) {
+			return (
+				<NameEntryScreen
+					onNamePicked={this.handleNamePicked}
 					name={this.state.playerName}
-					onClick={_ => this.handleBuzzClick()}/>
-				
-			 );
+				/>
+			);
+		} else {
+			return (
+				<BuzzerScreen
+					status={this.state.status}
+					sentBuzz={this.state.sentBuzz}
+					score={this.state.playerScore}
+					name={this.state.playerName}
+					onClick={(_) => this.handleBuzzClick()}
+				/>
+			);
 		}
 	}
 }
-
-	
