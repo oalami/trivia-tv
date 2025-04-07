@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "compile": "webpack",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js"
   },
   "dependencies": {
     "express": "^4.15.2",
