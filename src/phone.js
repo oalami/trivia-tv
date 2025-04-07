@@ -142,7 +142,7 @@ class PlayerControler extends React.Component {
 		this.handleNamePicked = this.handleNamePicked.bind(this);
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		let cookieId = 0;
 
 		if (document.cookie) {

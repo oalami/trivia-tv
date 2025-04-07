@@ -11,8 +11,9 @@
   "dependencies": {
     "express": "^4.15.2",
     "firebase": "^9.23.0",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "prop-types": "^15.8.1",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",

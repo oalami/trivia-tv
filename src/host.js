@@ -116,7 +116,7 @@ class Host extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const playersRef = child(gameRef, 'players');
     
     onChildAdded(playersRef, snap => {
