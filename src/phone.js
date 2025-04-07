@@ -1,10 +1,8 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getDatabase, ref, get, set, push, onValue, onChildChanged } from 'firebase/database';
+import ReactDOM from "react-dom";
+import Firebase from "firebase";
 
-const firebaseConfig = {
+var firebaseConfig = {
 	apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
 	authDomain: "tvquiz-92dd4.firebaseapp.com",
 	databaseURL: "https://tvquiz-92dd4.firebaseio.com",
@@ -13,16 +11,12 @@ const firebaseConfig = {
 	messagingSenderId: "946323037907",
 };
 
-let firebaseUser = null;
-let needRefresh = false;
+var firebaseUser = null;
+var needRefresh = false;
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const gameRef = ref(db, "games/game5");
-
-function initAuth() {
-	onAuthStateChanged(auth, (user) => {
+function auth() {
+	Firebase.initializeApp(firebaseConfig);
+	Firebase.auth().onAuthStateChanged((user) => {
 		if (user != null) {
 			console.log("Auth state changed " + user.uid);
 			if (needRefresh) {
@@ -36,15 +30,27 @@ function initAuth() {
 		firebaseUser = user;
 	});
 
-	signInAnonymously(auth).catch(function (error) {
-		// Handle Errors here.
-		const errorCode = error.code;
-		const errorMessage = error.message;
-		console.log(errorMessage);
-	});
+	Firebase.auth()
+		.signInAnonymously()
+		.catch(function (error) {
+			// Handle Errors here.
+			var errorCode = error.code;
+			var errorMessage = error.message;
+
+			console.log(errorMessage);
+		});
 }
 
-initAuth();
+auth();
+
+var gameRef = Firebase.database().ref("games/game5");
+
+document.addEventListener("DOMContentLoaded", function () {
+	ReactDOM.render(
+		React.createElement(PlayerControler),
+		document.getElementById("mount"),
+	);
+});
 
 class BuzzerScreen extends React.Component {
 	render() {
@@ -66,7 +72,7 @@ class BuzzerScreen extends React.Component {
 				className = "waiting";
 		}
 
-		let score = this.props.score || 0;
+		let score = this.props.score | 0;
 		return (
 			<div
 				className={"phone-content " + className}
@@ -88,14 +94,13 @@ class NameEntryScreen extends React.Component {
 	constructor() {
 		super();
 		this.handlePlayButtonClick = this.handlePlayButtonClick.bind(this);
-		this._input = React.createRef();
 	}
 
 	handlePlayButtonClick(e) {
 		e.preventDefault();
 
-		if (this._input.current.value !== "") {
-			this.props.onNamePicked(this._input.current.value);
+		if (this._input.value != "") {
+			this.props.onNamePicked(this._input.value);
 		} else {
 			//TODO: Visual indicator that player name required
 		}
@@ -110,7 +115,7 @@ class NameEntryScreen extends React.Component {
 					<input
 						type="text"
 						defaultValue={this.props.name}
-						ref={this._input}
+						ref={(c) => (this._input = c)}
 					/>
 					<button>Let's Play</button>
 				</form>
@@ -134,7 +139,7 @@ class PlayerControler extends React.Component {
 		this.handleNamePicked = this.handleNamePicked.bind(this);
 	}
 
-	componentDidMount() {
+	componentWillMount() {
 		let cookieId = 0;
 
 		if (document.cookie) {
@@ -142,11 +147,11 @@ class PlayerControler extends React.Component {
 			cookieId = uid;
 		}
 
-		get(ref(db, "games/game5/players")).then((snapList) => {
+		gameRef.child("players").once("value", (snapList) => {
 			let player = { playerName: "", playerId: null };
 
 			snapList.forEach((snap) => {
-				if (cookieId === snap.key) {
+				if (cookieId == snap.key) {
 					player = {
 						playerId: snap.key,
 						playerName: snap.val().name,
@@ -158,25 +163,25 @@ class PlayerControler extends React.Component {
 			this.setState(player);
 		});
 
-		onChildChanged(ref(db, "games/game5/players"), (snap) => {
+		gameRef.child("players").on("child_changed", (snap) => {
 			let p = snap.val();
-			if (this.state.playerId && this.state.playerId === snap.key) {
+			if (this.state.playerId && this.state.playerId == snap.key) {
 				this.setState({ playerName: p.name, playerScore: p.score });
 			}
 		});
 
-		onValue(ref(db, "games/game5/gameState"), (snap) => {
+		gameRef.child("gameState").on("value", (snap) => {
 			let state = {};
 			state.status = snap.val();
 			if (
-				this.state.status !== "loading" &&
-				state.status === "NEW" &&
+				this.state.status != "loading" &&
+				state.status == "NEW" &&
 				this.state.nameSet
 			) {
 				state.nameSet = false;
 			}
 
-			if (state.status !== "BUZZ_READY") {
+			if (state.status != "BUZZ_READY") {
 				state.sentBuzz = false;
 			}
 
@@ -188,11 +193,10 @@ class PlayerControler extends React.Component {
 		let playerId = this.state.playerId;
 
 		if (playerId != null) {
-			set(ref(db, `games/game5/players/${playerId}`), { name: name });
+			gameRef.child("players").child(playerId).set({ name: name });
 		} else {
-			const newPlayerRef = push(ref(db, "games/game5/players"));
-			playerId = newPlayerRef.key;
-			set(newPlayerRef, { name: name });
+			playerId = gameRef.child("players").push({ name: name }).key;
+
 			document.cookie = "playerId=" + playerId;
 		}
 
@@ -200,21 +204,20 @@ class PlayerControler extends React.Component {
 	}
 
 	handleBuzzClick() {
-		if (!this.state.sentBuzz && this.state.status === "BUZZ_READY") {
-			push(ref(db, "games/game5/buzzes"), {
-				name: this.state.playerName,
-				id: this.state.playerId,
-			});
+		if (!this.state.sentBuzz && this.state.status == "BUZZ_READY") {
+			gameRef
+				.child("buzzes")
+				.push({ name: this.state.playerName, id: this.state.playerId });
 			this.setState({ sentBuzz: true });
 		}
 	}
 
 	render() {
-		if (this.state.status === "loading") {
+		if (this.state.status == "loading") {
 			return <h1>Loading Please Wait</h1>;
 		} else if (
 			!this.state.nameSet &&
-			(this.state.status === "NEW" || this.state.playerName === "")
+			(this.state.status == "NEW" || this.state.playerName == "")
 		) {
 			return (
 				<NameEntryScreen
@@ -229,14 +232,9 @@ class PlayerControler extends React.Component {
 					sentBuzz={this.state.sentBuzz}
 					score={this.state.playerScore}
 					name={this.state.playerName}
-					onClick={() => this.handleBuzzClick()}
+					onClick={(_) => this.handleBuzzClick()}
 				/>
 			);
 		}
 	}
 }
-
-// Mount the app using createRoot
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<PlayerControler />);

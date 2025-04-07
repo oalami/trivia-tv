@@ -1,6 +1,4 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously } from 'firebase/auth';
-import { getDatabase, ref } from 'firebase/database';
+import firebase from 'firebase'
 
 const config = {
   apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
@@ -12,16 +10,14 @@ const config = {
 }; 
 
 export const init = function() {
-    const app = initializeApp(config);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    firebase.initializeApp(config); 
     
-    signInAnonymously(auth).catch(function(error) {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorMessage + " " + errorCode);
+    firebase.auth().signInAnonymously().catch(function(error) {
+    // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.log(errorMessage + " " +errorCode);
     });
 
-    return ref(db, "games/game5");
+    return firebase.database().ref("games/game5")
 } 
