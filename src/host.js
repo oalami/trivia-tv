@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Firebase from 'firebase'
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onChildAdded, onChildRemoved, onChildChanged, onValue, get, set, remove, off, query, limitToLast, push, child } from 'firebase/database';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 var firebaseConfig = {
     apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
@@ -11,9 +13,10 @@ var firebaseConfig = {
     messagingSenderId: "946323037907"
 };
 
-Firebase.initializeApp(firebaseConfig); 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-Firebase.auth().signInAnonymously().catch(function(error) {
+signInAnonymously(auth).catch(function(error) {
   // Handle Errors here.
   var errorCode = error.code;
   var errorMessage = error.message;
@@ -21,11 +24,8 @@ Firebase.auth().signInAnonymously().catch(function(error) {
   console.log(errorMessage);
 });
 
-var gameRef = Firebase.database().ref("games/game5");
-
-
-
-
+const db = getDatabase(app);
+const gameRef = ref(db, "games/game5");
 
 class Square extends React.Component {
   render() {
@@ -117,7 +117,9 @@ class Host extends React.Component {
   }
 
   componentWillMount() {
-    gameRef.child('players').on('child_added', snap => {
+    const playersRef = child(gameRef, 'players');
+    
+    onChildAdded(playersRef, snap => {
       let players = this.state.players.slice();
       let p = snap.val();
       
@@ -126,7 +128,7 @@ class Host extends React.Component {
       this.setState({players: players});
     });
 
-    gameRef.child('players').on('child_removed', snap => {
+    onChildRemoved(playersRef, snap => {
       let players = this.state.players.slice();
       let p = snap.val();      
 
@@ -136,7 +138,7 @@ class Host extends React.Component {
       this.setState({players: players});
     });
 
-    gameRef.child('players').on('child_changed', snap => {
+    onChildChanged(playersRef, snap => {
       let players = this.state.players.slice();
       let p = snap.val();      
 
@@ -150,53 +152,70 @@ class Host extends React.Component {
       }      
     });
 
-    gameRef.child('board').once('value', snap => {
+    const boardRef = child(gameRef, 'board');
+    get(boardRef).then(snap => {
       this.setState({board: snap.val()});
 
-      gameRef.child('gameState').on('value', snap => {      
+      const gameStateRef = child(gameRef, 'gameState');
+      onValue(gameStateRef, snap => {      
         let state = {};
         state.status = snap.val();
 
         this.setState(state);
       });
 
-      gameRef.child('picks').limitToLast(1).once('child_added', snap => {
+      const picksLimitRef = query(child(gameRef, 'picks'), limitToLast(1));
+      onChildAdded(picksLimitRef, snap => {
         this.setState({selectedQuestion: this.getSelectedQuestionFromKey(snap.val())})
-      })      
+      });
     });
 
-    gameRef.child('picks').on('child_added', snap => {
+    const picksRef = child(gameRef, 'picks');
+    onChildAdded(picksRef, snap => {
       let picks = this.state.picks.slice();
 
       picks.push(snap.val());
       this.setState({picks: picks});
     });
 
-    gameRef.child('picks').on('child_removed', snap => {      
+    onChildRemoved(picksRef, snap => {      
       this.setState({picks: []});
     });
 
-    gameRef.child('buzzes').on('child_added', snap => {
+    const buzzesRef = child(gameRef, 'buzzes');
+    onChildAdded(buzzesRef, snap => {
       let buzzes = this.state.buzzes.slice();
       buzzes.push(snap.val());
 
       this.setState({buzzes: buzzes});
     });    
 
-    gameRef.child('buzzes').on('child_removed', snap => {
+    onChildRemoved(buzzesRef, snap => {
       this.setState({buzzes: []});
     });
   }
 
   componentWillUnmount() {
-    gameRef.off();
+    // Unsubscribe from Firebase listeners
+    const playersRef = child(gameRef, 'players');
+    const gameStateRef = child(gameRef, 'gameState');
+    const picksRef = child(gameRef, 'picks');
+    const buzzesRef = child(gameRef, 'buzzes');
+    
+    off(playersRef);
+    off(gameStateRef);
+    off(picksRef);
+    off(buzzesRef);
   }
 
   nextQuestion() {
-      this.setState({selectedQuestion: null});
+    this.setState({selectedQuestion: null});
 
-      gameRef.child('buzzes').remove( _ => {})
-      gameRef.child('gameState').set("WAITING_PICK");
+    const buzzesRef = child(gameRef, 'buzzes');
+    const gameStateRef = child(gameRef, 'gameState');
+    
+    remove(buzzesRef);
+    set(gameStateRef, "WAITING_PICK");
   }
 
   getSelectedQuestionFromKey(key) {
@@ -223,28 +242,37 @@ class Host extends React.Component {
 
   handleStartGame() {
     let enableStartGame = (this.state.status === "NEW" || this.state.status === "ENDED")
-    if(enableStartGame) {      
-      gameRef.child('gameState').set("WAITING_PICK");
+    if(enableStartGame) {
+      const gameStateRef = child(gameRef, 'gameState');
+      set(gameStateRef, "WAITING_PICK");
     } else {     
       let reset = confirm('Reset Game?');
       if(reset) {
-        gameRef.child('picks').remove(_ => {});
-        gameRef.child('players').remove(_ => {});
-        gameRef.child('buzzes').remove(_ => {});          
-        gameRef.child('gameState').set("NEW");
+        const picksRef = child(gameRef, 'picks');
+        const playersRef = child(gameRef, 'players');
+        const buzzesRef = child(gameRef, 'buzzes');
+        const gameStateRef = child(gameRef, 'gameState');
+        
+        remove(picksRef);
+        remove(playersRef);
+        remove(buzzesRef);
+        set(gameStateRef, "NEW");
       }
     }
   }
 
   handleDisplayPick(key) {
-    if(this.state.status != "WAITING_PICK") {
-      return;
+    if(this.state.status == "WAITING_PICK") {
+      const picksRef = child(gameRef, 'picks');
+      const gameStateRef = child(gameRef, 'gameState');
+      
+      push(picksRef, key);
+      set(gameStateRef, 'DISPLAY_PICK');
+
+      setTimeout(_ => {
+        set(gameStateRef, 'BUZZ_READY');
+      }, 3000)
     }
-
-    gameRef.child('picks').push(key);
-    gameRef.child('gameState').set('DISPLAY_PICK');
-
-    setTimeout(_ => {gameRef.child('gameState').set('BUZZ_READY')}, 3000)
   }
 
   handleSkipPick(key) {
@@ -274,7 +302,8 @@ class Host extends React.Component {
     let p = this.getPlayerById(buzzer.id);
     let currentScore = p.score ? parseInt(p.score) : 0;
 
-    gameRef.child('players').child(buzzer.id).child('score').set(currentScore + parseInt(this.state.selectedQuestion.value))
+    const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');     
+    set(playerScoreRef, currentScore + parseInt(this.state.selectedQuestion.value));
 
     this.nextQuestion();
   }
@@ -291,7 +320,10 @@ class Host extends React.Component {
     let p = this.getPlayerById(buzzer.id);
     let currentScore = p.score ? parseInt(p.score) : 0;
 
-    gameRef.child('players').child(buzzer.id).child('score').set(currentScore - parseInt(this.state.selectedQuestion.value))    
+    const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');
+    set(playerScoreRef, currentScore - parseInt(this.state.selectedQuestion.value));
+    
+    // gameRef.child('players').child(buzzer.id).child('score').set(currentScore - parseInt(this.state.selectedQuestion.value))    
   }
 
   renderSelectedQuestion() {

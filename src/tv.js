@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as FB from './fb.js'
+import * as FB from './fb.js';
+import { getDatabase, ref, child, onChildAdded, onChildRemoved, onChildChanged, onValue, get, off } from 'firebase/database';
 
-var gameRef = FB.init()
+const gameRef = FB.init();
+const db = getDatabase();
 
 document.addEventListener('DOMContentLoaded', function() {
   ReactDOM.render(
@@ -114,7 +116,9 @@ class TV extends React.Component {
 	}
 
 	componentWillMount() {
-	    gameRef.child('players').on('child_added', snap => {
+		const playersRef = child(gameRef, 'players');
+		
+	    onChildAdded(playersRef, snap => {
 	      let players = this.state.players.slice();
 	      let p = snap.val();
 	      
@@ -123,7 +127,7 @@ class TV extends React.Component {
 	      this.setState({players: players});
 	    });
 
-	    gameRef.child('players').on('child_removed', snap => {
+	    onChildRemoved(playersRef, snap => {
 	      let players = this.state.players.slice();
 	      let p = snap.val();      
 
@@ -133,7 +137,7 @@ class TV extends React.Component {
 	      this.setState({players: players});
 	    });
 
-	    gameRef.child('players').on('child_changed', snap => {
+	    onChildChanged(playersRef, snap => {
 	      let players = this.state.players.slice();
 	      let p = snap.val();      
 
@@ -147,10 +151,12 @@ class TV extends React.Component {
 	      }      
 	    });
 
-	    gameRef.child('board').once('value', snap => {
+		const boardRef = child(gameRef, 'board');
+	    get(boardRef).then(snap => {
 	      this.setState({board: snap.val()});
 
-	      gameRef.child('gameState').on('value', snap => {      
+		  const gameStateRef = child(gameRef, 'gameState');
+	      onValue(gameStateRef, snap => {      
 	        let state = {};
 	        state.status = snap.val();
 
@@ -158,7 +164,8 @@ class TV extends React.Component {
 	      });
 	    });
 
-	    gameRef.child('picks').on('child_added', snap => {
+		const picksRef = child(gameRef, 'picks');
+	    onChildAdded(picksRef, snap => {
 	   	  let pick = snap.val();
 	      let picks = this.state.picks.slice();
 	      picks.push(pick);
@@ -171,20 +178,33 @@ class TV extends React.Component {
 	      this.setState({picks: picks, selectedQuestion: sq});
 	    });
 
-	    gameRef.child('picks').on('child_removed', snap => {      
+	    onChildRemoved(picksRef, snap => {      
 	      this.setState({picks: []});
 	    });
 
-	    gameRef.child('buzzes').on('child_added', snap => {
+		const buzzesRef = child(gameRef, 'buzzes');
+	    onChildAdded(buzzesRef, snap => {
 	      let buzzes = this.state.buzzes.slice();
 	      buzzes.push(snap.val());
 
 	      this.setState({buzzes: buzzes});
 	    });    
 
-	    gameRef.child('buzzes').on('child_removed', snap => {
+	    onChildRemoved(buzzesRef, snap => {
 	      this.setState({buzzes: []});
 	    });
+	}
+
+	componentWillUnmount() {
+		const playersRef = child(gameRef, 'players');
+		const gameStateRef = child(gameRef, 'gameState');
+		const picksRef = child(gameRef, 'picks');
+		const buzzesRef = child(gameRef, 'buzzes');
+		
+		off(playersRef);
+		off(gameStateRef);
+		off(picksRef);
+		off(buzzesRef);
 	}
 
 	getSelectedQuestionFromKey(key) {

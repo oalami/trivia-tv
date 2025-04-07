@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import Firebase from "firebase";
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, child, push, set, get, onValue, onChildChanged, onChildAdded } from 'firebase/database';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 var firebaseConfig = {
 	apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
@@ -15,8 +17,10 @@ var firebaseUser = null;
 var needRefresh = false;
 
 function auth() {
-	Firebase.initializeApp(firebaseConfig);
-	Firebase.auth().onAuthStateChanged((user) => {
+	const app = initializeApp(firebaseConfig);
+	const auth = getAuth(app);
+	
+	onAuthStateChanged(auth, (user) => {
 		if (user != null) {
 			console.log("Auth state changed " + user.uid);
 			if (needRefresh) {
@@ -30,20 +34,19 @@ function auth() {
 		firebaseUser = user;
 	});
 
-	Firebase.auth()
-		.signInAnonymously()
-		.catch(function (error) {
-			// Handle Errors here.
-			var errorCode = error.code;
-			var errorMessage = error.message;
+	signInAnonymously(auth).catch(function (error) {
+		// Handle Errors here.
+		var errorCode = error.code;
+		var errorMessage = error.message;
 
-			console.log(errorMessage);
-		});
+		console.log(errorMessage);
+	});
+	
+	return getDatabase(app);
 }
 
-auth();
-
-var gameRef = Firebase.database().ref("games/game5");
+const db = auth();
+const gameRef = ref(db, "games/game5");
 
 document.addEventListener("DOMContentLoaded", function () {
 	ReactDOM.render(
@@ -147,7 +150,8 @@ class PlayerControler extends React.Component {
 			cookieId = uid;
 		}
 
-		gameRef.child("players").once("value", (snapList) => {
+		const playersRef = child(gameRef, "players");
+		get(playersRef).then((snapList) => {
 			let player = { playerName: "", playerId: null };
 
 			snapList.forEach((snap) => {
@@ -163,14 +167,15 @@ class PlayerControler extends React.Component {
 			this.setState(player);
 		});
 
-		gameRef.child("players").on("child_changed", (snap) => {
+		onChildChanged(playersRef, (snap) => {
 			let p = snap.val();
 			if (this.state.playerId && this.state.playerId == snap.key) {
 				this.setState({ playerName: p.name, playerScore: p.score });
 			}
 		});
 
-		gameRef.child("gameState").on("value", (snap) => {
+		const gameStateRef = child(gameRef, "gameState");
+		onValue(gameStateRef, (snap) => {
 			let state = {};
 			state.status = snap.val();
 			if (
@@ -193,21 +198,25 @@ class PlayerControler extends React.Component {
 		let playerId = this.state.playerId;
 
 		if (playerId != null) {
-			gameRef.child("players").child(playerId).set({ name: name });
+			const playerRef = child(child(gameRef, "players"), playerId);
+			set(playerRef, { name: name });
 		} else {
-			playerId = gameRef.child("players").push({ name: name }).key;
+			const playersRef = child(gameRef, "players");
+			playerId = push(playersRef, { name: name }).key;
 
 			document.cookie = "playerId=" + playerId;
 		}
 
-		this.setState({ playerId: playerId, playerName: name, nameSet: true });
+		this.setState({ playerId: playerId, nameSet: true, playerName: name });
 	}
 
 	handleBuzzClick() {
-		if (!this.state.sentBuzz && this.state.status == "BUZZ_READY") {
-			gameRef
-				.child("buzzes")
-				.push({ name: this.state.playerName, id: this.state.playerId });
+		if (this.state.status == "BUZZ_READY" && !this.state.sentBuzz) {
+			const buzzesRef = child(gameRef, "buzzes");
+			push(buzzesRef, {
+				name: this.state.playerName,
+				id: this.state.playerId
+			});
 			this.setState({ sentBuzz: true });
 		}
 	}
