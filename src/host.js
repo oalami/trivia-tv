@@ -1,31 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import * as FB from './fb.js';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onChildAdded, onChildRemoved, onChildChanged, onValue, get, set, remove, off, query, limitToLast, push, child } from 'firebase/database';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 
-var firebaseConfig = {
-    apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
-    authDomain: "tvquiz-92dd4.firebaseapp.com",
-    databaseURL: "https://tvquiz-92dd4.firebaseio.com",
-    projectId: "tvquiz-92dd4",
-    storageBucket: "tvquiz-92dd4.appspot.com",
-    messagingSenderId: "946323037907"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-signInAnonymously(auth).catch(function(error) {
-  // Handle Errors here.
-  var errorCode = error.code;
-  var errorMessage = error.message;
-  
-  console.log(errorMessage);
-});
-
-const db = getDatabase(app);
-const gameRef = ref(db, "games/game5");
+const gameRef = FB.init();
 
 class Square extends React.Component {
   render() {
@@ -228,6 +208,12 @@ class Host extends React.Component {
     selectedQuestion.value = val;
     selectedQuestion.category = this.state.board[col].category;
     selectedQuestion.text = this.state.board[col].items[val];
+    
+    if(this.state.board[col].q) {
+      selectedQuestion.solution = this.state.board[col].q[val];
+    } else {
+      selectedQuestion.solution = "No Solution Stored";
+    }
 
     return selectedQuestion;
   }
@@ -334,8 +320,10 @@ class Host extends React.Component {
         <div>
           <span className="bold">{this.state.selectedQuestion.category}, {this.state.selectedQuestion.value}</span>
           <br/>
-          <span>{this.state.selectedQuestion.text}</span>
-          <br/>
+          <span>{this.state.selectedQuestion.text}</span>          
+          <span className="solution">Solution:<br/>
+          <span className="solution-text">{this.state.selectedQuestion.solution}</span>
+          </span>
           <button className="display-pick" onClick={_ => this.handleDisplayPick(this.state.selectedQuestion.key)} disabled={this.state.status != "WAITING_PICK"}>Display Question</button>
           <button className="display-pick" onClick={_ => this.handleSkipPick(this.state.selectedQuestion.key)} disabled={this.state.status != "BUZZ_READY"}>Skip</button>
         </div>

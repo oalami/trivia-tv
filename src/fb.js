@@ -23,5 +23,5 @@ export const init = function() {
     });
 
     const db = getDatabase(app);
-    return ref(db, "games/game5");
+    return ref(db, "games/game6");
 } 

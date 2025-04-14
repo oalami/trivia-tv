@@ -89,3 +89,13 @@ button.display-pick {
 .game-info {
   margin-left: 20px;
 }
+
+.solution {
+  display: block;
+  padding-top: 5px;
+}
+
+.solution-text {
+  font-style: italic;
+  padding-left: 20px;
+}
