@@ -4,8 +4,7 @@ import * as FB from './fb.js';
 import { getDatabase, ref, child, onChildAdded, onChildRemoved, onChildChanged, onValue, get, off } from 'firebase/database';
 
 const gameRef = FB.init();
-// const db = getDatabase();
-
+ 
 document.addEventListener('DOMContentLoaded', function() {
   ReactDOM.render(
     React.createElement(TV),

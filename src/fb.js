@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref } from 'firebase/database';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-
+ 
 const config = {
   apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
   authDomain: "tvquiz-92dd4.firebaseapp.com",

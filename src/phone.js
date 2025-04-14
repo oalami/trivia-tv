@@ -93,7 +93,7 @@ class BuzzerScreen extends React.Component {
 		);
 	}
 }
-
+ 
 class NameEntryScreen extends React.Component {
 	constructor() {
 		super();

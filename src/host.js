@@ -187,7 +187,7 @@ class Host extends React.Component {
     off(picksRef);
     off(buzzesRef);
   }
-
+ 
   nextQuestion() {
     this.setState({selectedQuestion: null});
 
