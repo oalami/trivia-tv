@@ -1,52 +1,53 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import * as FB from './fb.js';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, child, push, set, get, onValue, onChildChanged, onChildAdded } from 'firebase/database';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
-var firebaseConfig = {
-	apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
-	authDomain: "tvquiz-92dd4.firebaseapp.com",
-	databaseURL: "https://tvquiz-92dd4.firebaseio.com",
-	projectId: "tvquiz-92dd4",
-	storageBucket: "tvquiz-92dd4.appspot.com",
-	messagingSenderId: "946323037907",
-};
+// var firebaseConfig = {
+// 	apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
+// 	authDomain: "tvquiz-92dd4.firebaseapp.com",
+// 	databaseURL: "https://tvquiz-92dd4.firebaseio.com",
+// 	projectId: "tvquiz-92dd4",
+// 	storageBucket: "tvquiz-92dd4.appspot.com",
+// 	messagingSenderId: "946323037907",
+// };
 
-var firebaseUser = null;
-var needRefresh = false;
+// var firebaseUser = null;
+// var needRefresh = false;
 
-function auth() {
-	const app = initializeApp(firebaseConfig);
-	const auth = getAuth(app);
+// function auth() {
+// 	const app = initializeApp(firebaseConfig);
+// 	const auth = getAuth(app);
 	
-	onAuthStateChanged(auth, (user) => {
-		if (user != null) {
-			console.log("Auth state changed " + user.uid);
-			if (needRefresh) {
-				window.location.reload();
-			}
-		} else {
-			needRefresh = true;
-			console.log("Auth state changed NULL");
-		}
+// 	onAuthStateChanged(auth, (user) => {
+// 		if (user != null) {
+// 			console.log("Auth state changed " + user.uid);
+// 			if (needRefresh) {
+// 				window.location.reload();
+// 			}
+// 		} else {
+// 			needRefresh = true;
+// 			console.log("Auth state changed NULL");
+// 		}
 
-		firebaseUser = user;
-	});
+// 		firebaseUser = user;
+// 	});
 
-	signInAnonymously(auth).catch(function (error) {
-		// Handle Errors here.
-		var errorCode = error.code;
-		var errorMessage = error.message;
+// 	signInAnonymously(auth).catch(function (error) {
+// 		// Handle Errors here.
+// 		var errorCode = error.code;
+// 		var errorMessage = error.message;
 
-		console.log(errorMessage);
-	});
+// 		console.log(errorMessage);
+// 	});
 	
-	return getDatabase(app);
-}
+// 	return getDatabase(app);
+// }
 
-const db = auth();
-const gameRef = ref(db, "games/game5");
+// const db = auth();
+const gameRef = FB.init();
 
 document.addEventListener("DOMContentLoaded", function () {
 	ReactDOM.render(
@@ -113,7 +114,7 @@ class NameEntryScreen extends React.Component {
 		return (
 			<div className="phone-content">
 				<form onSubmit={this.handlePlayButtonClick}>
-					<h1>MERCHANTXP JEOPARDY</h1>
+					<h1>CLIMATE JEOPARDY</h1>
 					<h2>Enter Team Name:</h2>
 					<input
 						type="text"

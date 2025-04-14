@@ -98,4 +98,5 @@ button.display-pick {
 .solution-text {
   font-style: italic;
   padding-left: 20px;
+  display: block
 }
