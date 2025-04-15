@@ -191,7 +191,7 @@ class Host extends React.Component {
   showSolution() {
     const gameStateRef = child(gameRef, 'gameState');
 
-    if(!selectedPrompt.solution) {
+    if(!this.state.selectedPrompt.solution) {
       this.nextQuestion();
     } else {
       set(gameStateRef, "DISPLAY_SOLUTION");
