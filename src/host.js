@@ -211,7 +211,7 @@ class Host extends React.Component {
     set(gameStateRef, "WAITING_PICK");
   }
 
-  getselectedPromptFromKey(key) {
+  getSelectedPromptFromKey(key) {
     let selectedPrompt = {};
     let split = key.split(':');    
     let col = split[1];
