@@ -90,7 +90,7 @@ class PlayerList extends React.Component {
 				<div className="player-box-header">TEAMS</div>
 				{this.props.players.map(p => {
 					let score = p.score || "0";
-					return (<div className={"player-box" + (this.props.buzzerName == p.name ? " buzzed" : "")}>
+					return (<div key={p.name} className={"player-box" + (this.props.buzzerName == p.name ? " buzzed" : "")}>
 										<div className={"player-name" + (this.props.buzzerName == p.name ? " buzzed" : "")}>{p.name}</div>
 										<div className="player-score">{score}</div>
 									</div>)
@@ -231,8 +231,7 @@ class TV extends React.Component {
   		if(this.state.buzzes.length > 0) {
   			buzzerName = this.state.buzzes[0].name;
   		}
-  		console.log('here: buzz: ' + buzzerName);
-
+  		
   		if(this.state.selectedQuestion != null && (this.state.status == "DISPLAY_PICK" || this.state.status == "BUZZ_READY")) {  			
 		   return (    
 		    	<div className="tv-content">
