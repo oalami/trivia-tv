@@ -12,13 +12,24 @@ document.addEventListener('DOMContentLoaded', function() {
   );
 });
 
-class DisplayQuestion extends React.Component {
-
+class DisplayPrompt extends React.Component {
 	render() {
 		return (
 			<div className="display-item-parent">
 		<div className="display-item">
-			<div>{this.props.selectedQuestion.text}</div>
+			<div>{this.props.selectedPrompt.text}</div>
+		</div>
+		</div>
+		);
+	}
+}
+
+class DisplaySolution extends React.Component {
+	render() {
+		return (
+			<div className="display-item-parent">
+		<div className="display-item">
+			<div>{this.props.selectedPrompt.solution || this.props.selectedPrompt.text}</div>
 		</div>
 		</div>
 		);
@@ -108,7 +119,8 @@ class TV extends React.Component {
       		board: [],
       		status: "loading",
       		players: [],
-      		selectedQuestion: null,
+      		selectedPrompt: null,
+      		selectedSolution: null,
       		picks: [],
       		buzzes: []
     	};		
@@ -161,38 +173,40 @@ class TV extends React.Component {
 
 	        this.setState(state);
 	      });
+
+				const picksRef = child(gameRef, 'picks');
+				onChildAdded(picksRef, snap => {
+					 let pick = snap.val();
+					let picks = this.state.picks.slice();
+					picks.push(pick);
+	
+					let sq = this.getSelectedPromptFromKey(pick);
+	
+					console.log(pick)
+					console.log(sq)
+	
+					this.setState({picks: picks, selectedPrompt: sq});
+				});
+	
+				onChildRemoved(picksRef, snap => {      
+					this.setState({picks: []});
+				});
+	
+			const buzzesRef = child(gameRef, 'buzzes');
+				onChildAdded(buzzesRef, snap => {
+					let buzzes = this.state.buzzes.slice();
+					buzzes.push(snap.val());
+	
+					this.setState({buzzes: buzzes});
+				});    
+	
+				onChildRemoved(buzzesRef, snap => {
+					this.setState({buzzes: []});
+				});				
 	    });
+		}
 
-		const picksRef = child(gameRef, 'picks');
-	    onChildAdded(picksRef, snap => {
-	   	  let pick = snap.val();
-	      let picks = this.state.picks.slice();
-	      picks.push(pick);
-
-	      let sq = this.getSelectedQuestionFromKey(pick);
-
-	      console.log(pick)
-	      console.log(sq)
-
-	      this.setState({picks: picks, selectedQuestion: sq});
-	    });
-
-	    onChildRemoved(picksRef, snap => {      
-	      this.setState({picks: []});
-	    });
-
-		const buzzesRef = child(gameRef, 'buzzes');
-	    onChildAdded(buzzesRef, snap => {
-	      let buzzes = this.state.buzzes.slice();
-	      buzzes.push(snap.val());
-
-	      this.setState({buzzes: buzzes});
-	    });    
-
-	    onChildRemoved(buzzesRef, snap => {
-	      this.setState({buzzes: []});
-	    });
-	}
+	
 
 	componentWillUnmount() {
 		const playersRef = child(gameRef, 'players');
@@ -206,20 +220,23 @@ class TV extends React.Component {
 		off(buzzesRef);
 	}
 
-	getSelectedQuestionFromKey(key) {
-	    let selectedQuestion = {};
+	getSelectedPromptFromKey(key) {
+	    let selectedPrompt = {};
 	    let split = key.split(':');    
 	    let col = split[1];
 	    let val = split[0];
 	    
-	    selectedQuestion.key = key;
-	    selectedQuestion.value = val;
-	    selectedQuestion.category = this.state.board[col].category;
-	    selectedQuestion.text = this.state.board[col].items[val];
+	    selectedPrompt.key = key;
+	    selectedPrompt.value = val;
+	    selectedPrompt.category = this.state.board[col].category;
+	    selectedPrompt.text = this.state.board[col].items[val];
+			
+			if(this.state.board[col].q[val]) {
+				selectedPrompt.solution = this.state.board[col].q[val];
+			}
 
-	    return selectedQuestion;
+	    return selectedPrompt;
 	}
-
 
 	render() {
 	  	let categories = [];
@@ -232,13 +249,20 @@ class TV extends React.Component {
   			buzzerName = this.state.buzzes[0].name;
   		}
   		
-  		if(this.state.selectedQuestion != null && (this.state.status == "DISPLAY_PICK" || this.state.status == "BUZZ_READY")) {  			
+  		if(this.state.selectedPrompt != null && (this.state.status == "DISPLAY_PICK" || this.state.status == "BUZZ_READY")) {  			
 		   return (    
 		    	<div className="tv-content">
-		    		<DisplayQuestion selectedQuestion={this.state.selectedQuestion}/>
+		    		<DisplayPrompt selectedPrompt={this.state.selectedPrompt}/>
 		    		<PlayerList players={this.state.players} buzzerName={buzzerName}/>
 		      </div>
 		    );	
+		} else if(this.state.selectedPrompt != null && this.state.status == "DISPLAY_SOLUTION") {
+		   return (    
+		    	<div className="tv-content">
+		    		<DisplaySolution selectedPrompt={this.state.selectedPrompt}/>
+		    		<PlayerList players={this.state.players} buzzerName={buzzerName}/>
+		      </div>
+		    );
 		} else {
 		   return (    
 		    	<div className="tv-content">

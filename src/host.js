@@ -90,7 +90,7 @@ class Host extends React.Component {
       board: [],
       status: "loading",
       players: [],
-      selectedQuestion: null,
+      selectedPrompt: null,
       picks: [],
       buzzes: []
     };
@@ -146,7 +146,7 @@ class Host extends React.Component {
 
       const picksLimitRef = query(child(gameRef, 'picks'), limitToLast(1));
       onChildAdded(picksLimitRef, snap => {
-        this.setState({selectedQuestion: this.getSelectedQuestionFromKey(snap.val())})
+        this.setState({selectedPrompt: this.getSelectedPromptFromKey(snap.val())})
       });
     });
 
@@ -187,9 +187,22 @@ class Host extends React.Component {
     off(picksRef);
     off(buzzesRef);
   }
+
+  showSolution() {
+    const gameStateRef = child(gameRef, 'gameState');
+
+    if(!selectedPrompt.solution) {
+      this.nextQuestion();
+    } else {
+      set(gameStateRef, "DISPLAY_SOLUTION");
+      setTimeout(_ => {
+        this.nextQuestion();
+      }, 5000)
+    }
+  }
  
   nextQuestion() {
-    this.setState({selectedQuestion: null});
+    this.setState({selectedPrompt: null});
 
     const buzzesRef = child(gameRef, 'buzzes');
     const gameStateRef = child(gameRef, 'gameState');
@@ -198,24 +211,24 @@ class Host extends React.Component {
     set(gameStateRef, "WAITING_PICK");
   }
 
-  getSelectedQuestionFromKey(key) {
-    let selectedQuestion = {};
+  getselectedPromptFromKey(key) {
+    let selectedPrompt = {};
     let split = key.split(':');    
     let col = split[1];
     let val = split[0];
     
-    selectedQuestion.key = key;
-    selectedQuestion.value = val;
-    selectedQuestion.category = this.state.board[col].category;
-    selectedQuestion.text = this.state.board[col].items[val];
+    selectedPrompt.key = key;
+    selectedPrompt.value = val;
+    selectedPrompt.category = this.state.board[col].category;
+    selectedPrompt.text = this.state.board[col].items[val];
     
     if(this.state.board[col].q) {
-      selectedQuestion.solution = this.state.board[col].q[val];
+      selectedPrompt.solution = this.state.board[col].q[val];
     } else {
-      selectedQuestion.solution = "No Solution Stored";
+      selectedPrompt.solution = "No Solution Stored";
     }
 
-    return selectedQuestion;
+    return selectedPrompt;
   }
 
   getPlayerById(id) {
@@ -265,7 +278,7 @@ class Host extends React.Component {
     let skip = confirm('Really Skip?');
 
     if(skip) {
-      this.nextQuestion();
+      this.showSolution();
     }
   }
 
@@ -274,7 +287,7 @@ class Host extends React.Component {
       return;
     }    
 
-    this.setState({selectedQuestion: this.getSelectedQuestionFromKey(key)})
+    this.setState({selectedPrompt: this.getSelectedPromptFromKey(key)})
   }  
 
   handleWin(buzzer) {
@@ -289,9 +302,9 @@ class Host extends React.Component {
     let currentScore = p.score ? parseInt(p.score) : 0;
 
     const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');     
-    set(playerScoreRef, currentScore + parseInt(this.state.selectedQuestion.value));
+    set(playerScoreRef, currentScore + parseInt(this.state.selectedPrompt.value));
 
-    this.nextQuestion();
+    this.showSolution();
   }
 
 
@@ -307,25 +320,25 @@ class Host extends React.Component {
     let currentScore = p.score ? parseInt(p.score) : 0;
 
     const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');
-    set(playerScoreRef, currentScore - parseInt(this.state.selectedQuestion.value));
+    set(playerScoreRef, currentScore - parseInt(this.state.selectedPrompt.value));
     
-    // gameRef.child('players').child(buzzer.id).child('score').set(currentScore - parseInt(this.state.selectedQuestion.value))    
+    // gameRef.child('players').child(buzzer.id).child('score').set(currentScore - parseInt(this.state.selectedPrompt.value))    
   }
 
-  renderSelectedQuestion() {
-    if(this.state.selectedQuestion === null) {
+  renderselectedPrompt() {
+    if(this.state.selectedPrompt === null) {
       return (<span>No Selected Question</span>)
     } else {
       return (
         <div>
-          <span className="bold">{this.state.selectedQuestion.category}, {this.state.selectedQuestion.value}</span>
+          <span className="bold">{this.state.selectedPrompt.category}, {this.state.selectedPrompt.value}</span>
           <br/>
-          <span>{this.state.selectedQuestion.text}</span>          
+          <span>{this.state.selectedPrompt.text}</span>          
           <span className="solution">Solution:<br/>
-          <span className="solution-text">{this.state.selectedQuestion.solution}</span>
+          <span className="solution-text">{this.state.selectedPrompt.solution}</span>
           </span>
-          <button className="display-pick" onClick={_ => this.handleDisplayPick(this.state.selectedQuestion.key)} disabled={this.state.status != "WAITING_PICK"}>Display Question</button>
-          <button className="display-pick" onClick={_ => this.handleSkipPick(this.state.selectedQuestion.key)} disabled={this.state.status != "BUZZ_READY"}>Skip</button>
+          <button className="display-pick" onClick={_ => this.handleDisplayPick(this.state.selectedPrompt.key)} disabled={this.state.status != "WAITING_PICK"}>Display Question</button>
+          <button className="display-pick" onClick={_ => this.handleSkipPick(this.state.selectedPrompt.key)} disabled={this.state.status != "BUZZ_READY"}>Skip</button>
         </div>
       );
     }
@@ -381,7 +394,7 @@ class Host extends React.Component {
             </div>
 
             <div className="host-question">
-              {this.renderSelectedQuestion()}
+              {this.renderselectedPrompt()}
             </div>
 
             {this.renderBuzzersList()}
