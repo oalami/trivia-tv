@@ -181,10 +181,7 @@ class TV extends React.Component {
 					picks.push(pick);
 	
 					let sq = this.getSelectedPromptFromKey(pick);
-	
-					console.log(pick)
-					console.log(sq)
-	
+		
 					this.setState({picks: picks, selectedPrompt: sq});
 				});
 	
