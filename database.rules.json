@@ -17,6 +17,12 @@
         },
         "buzzes" : {
           ".write": "auth != null"          
+        },
+				"finals" : {
+          ".write": "auth != null"          
+        },
+				"timer" : {
+          ".write": "auth != null"          
         }
     	}
     }

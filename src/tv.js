@@ -320,11 +320,16 @@ class TV extends React.Component {
 		const gameStateRef = child(gameRef, 'gameState');
 		const picksRef = child(gameRef, 'picks');
 		const buzzesRef = child(gameRef, 'buzzes');
+		const finalRoundRef = child(gameRef, 'finalRound');
+		const timerRef = child(gameRef, 'timer');
+		
 
 		off(playersRef);
 		off(gameStateRef);
 		off(picksRef);
 		off(buzzesRef);
+		off(finalRoundRef);
+		off(timerRef);
 	}
 
 	getSelectedPromptFromKey(key) {
@@ -356,38 +361,35 @@ class TV extends React.Component {
 			buzzerName = this.state.buzzes[0].name;
 		}
 
-		if (this.state.status.startsWith("FINAL")) {
-			if (this.state.status == "FINAL_ROUND_WAGER") {
-				return (
-					<div className="tv-content">
-						<DisplayFinalRoundWager finalRound={this.state.finalRound} />
-						<div className="sidebar">
-							<Timer duration={this.state.timerDuration} timeLeft={this.state.timer} />
-							<PlayerList players={this.state.players} buzzerName={buzzerName} />
-						</div>
-						
+		if (this.state.status == "FINAL_ROUND_WAGER") {
+			return (
+				<div className="tv-content">
+					<DisplayFinalRoundWager finalRound={this.state.finalRound} />
+					<div className="sidebar">
+						<Timer duration={this.state.timerDuration} timeLeft={this.state.timer} />
+						<PlayerList players={this.state.players} buzzerName={buzzerName} />
 					</div>
-				);
-			} else if (this.state.status == "FINAL_ROUND_PROMPT") {
-				return (
-					<div className="tv-content">
-						<DisplayPrompt prompt={this.state.finalRound.prompt} />
-						<div className="sidebar">
-							<Timer duration={this.state.timerDuration} timeLeft={this.state.timer} />
-							<PlayerList players={this.state.players} buzzerName={buzzerName} />
-						</div>
-					</div>
-				);
-			} else {
-				return (
-					<div className="tv-content">
-						<DisplayCloser players={this.state.players} />
-					</div>
-				);
-			}
-		}
 
-		if (this.state.selectedPrompt != null && (this.state.status == "DISPLAY_PICK" || this.state.status == "BUZZ_READY")) {
+				</div>
+			);
+		} else if (this.state.status == "FINAL_ROUND_PROMPT") {
+			return (
+				<div className="tv-content">
+					<DisplayPrompt prompt={this.state.finalRound.prompt} />
+					<div className="sidebar">
+						<Timer duration={this.state.timerDuration} timeLeft={this.state.timer} />
+						<PlayerList players={this.state.players} buzzerName={buzzerName} />
+					</div>
+				</div>
+			);
+		} else if (this.state.status == "FINAL_ROUND_DISPLAY" || this.state.status == "ENDED") {
+			return (
+				<div className="tv-content">
+					<DisplayCloser players={this.state.players} />
+				</div>
+			);
+
+		} else if (this.state.selectedPrompt != null && (this.state.status == "DISPLAY_PICK" || this.state.status == "BUZZ_READY")) {
 			return (
 				<div className="tv-content">
 					<DisplayPrompt prompt={this.state.selectedPrompt.text} />
@@ -400,7 +402,7 @@ class TV extends React.Component {
 			return (
 				<div className="tv-content">
 					<DisplayPrompt prompt={this.state.selectedPrompt.solution} />
-					<div className="sidebar">					
+					<div className="sidebar">
 						<PlayerList players={this.state.players} buzzerName={buzzerName} />
 					</div>
 				</div>

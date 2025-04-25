@@ -1,7 +1,7 @@
 
 @font-face {
     font-family: 'Silom';
-    src:url('Silom.ttf.svg#Silom') format('svg'),
+    src:url('Silom.ttf.svg#Silom') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -76,7 +76,7 @@ input{
     color: white;
     font-size: 40px;
     column-count: 2;
-    column-gap: 20px;
+    column-gap: 50px;
 }
 
 .final-category-header {
@@ -231,7 +231,7 @@ form {
   font-size: 18px;  
   font-weight: normal;
   font-family: "Times New Roman", "Georgia", serif;
-  color: #4048CC;
+  color: #51E3C2;
   position: relative;
 }
 
