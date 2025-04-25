@@ -55,9 +55,41 @@ input{
 .display-item-parent {
   display: table;
   border-spacing: 40px;
-  height: 774px;
-  width: 1092px;  
+  height: 894px;
+  width: 1484px;  
   float: left;
+}
+
+.display-item-final {
+  font-size: 60px;  
+  font-weight: normal;
+  font-family: "Times New Roman", "Georgia", serif;
+  display: table-cell;
+  text-align: center;  
+  background-color: #4048CC;
+  letter-spacing: 1px;
+  padding: 50px;
+}
+
+.final-score-list {
+    text-align: left;
+    color: white;
+    font-size: 40px;
+    column-count: 2;
+    column-gap: 20px;
+}
+
+.final-category-header {
+  padding-top: 150px
+}
+
+.final-category {
+  text-transform: uppercase;
+  color: white;
+}
+
+.final-prompt {
+
 }
 
 .display-item {
@@ -85,6 +117,12 @@ input{
 .team-name {
   color: white;
   padding-top: 30px;
+}
+
+.team-name-final {
+  color: white;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .message {
@@ -166,16 +204,27 @@ form {
   top: 15px;
 }
 
-.player-list {
-  /*width: 100%;*/
-  margin-top: 82px;
-  text-align: center;
-  display: inline-block;
-  float: right;
+.sidebar {
+  margin-top: 20px;
+  display: inline;
+  width: 240px;
+  position: absolute;
+  margin-left: 40px;
 }
 
-.player-box {
-  border: 1px solid #4048CC;
+.timer-container {
+  text-align: center;
+  display: inline-block;
+}
+
+.timer-text {
+  position: absolute;
+  font-size: 36px;
+  font-weight: bold;
+  top: 40px;
+  left: 83px;
+}
+.timer {
   width: 200px;
   height: 120px;
   margin: 20px;
@@ -184,6 +233,21 @@ form {
   font-family: "Times New Roman", "Georgia", serif;
   color: #4048CC;
   position: relative;
+}
+
+.player-list {
+  margin-top: 20px;
+  display: flow-root;
+}
+
+.player-box {
+  border: 1px solid #4048CC;
+  width: 240px;
+  font-size: 18px;  
+  font-weight: normal;
+  font-family: "Times New Roman", "Georgia", serif;
+  color: #4048CC;
+  margin-bottom: 20px;
 }
 
 .player-name.buzzed {
@@ -196,36 +260,35 @@ form {
 }
 
 .player-box-header {  
-  width: 200px;
-  /*height: 120px;*/
-  margin: 20px;
+  width: 240px;
+  margin-bottom: 10px;
   font-size: 22px;  
   font-weight: normal;
   font-family: "Times New Roman", "Georgia", serif;
+  text-align: center;
   color: white;
   position: relative;
 }
 
 
 .player-name {
-  padding: 10px;  
-  /*border: 1px solid #4048CC;*/
-  width: 180px;
-  /*margin: 20px;*/
+  padding: 5px;  
+  width: 160px;
   font-size: 20px;  
   font-weight: normal;
-  /*font-family: "Times New Roman", "Georgia", serif;*/
   color: white;
   background-color: #4048CC;
-  position: relative;  
+  display: inline-block; 
 }
 
 .player-score {
-  position: absolute;
-  bottom: 15px;
-  width: 100%;
+  padding-top: 5px;
   font-size: 20px;
   color: white;
+  width: 70px;
+  display: inline-block;
+  text-align: center;
+  float: inline-end;
 }
 
 

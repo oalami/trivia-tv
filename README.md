@@ -15,8 +15,11 @@ Built with React and Firebase.
 - NEW: Game Hasn't Started
 - STARTED: Game Has Started
 - WAITING_PICK: Waiting For Square Pick
-- DISPLAY_PICK: Question Picked
-- BUZZ_READY: Question Picked, Ready for Buzzing or Question Picked, Player Has Buzzed
+- DISPLAY_PICK: Prompt Picked
+- BUZZ_READY: Prompt Picked, Ready for Buzzing or Prompt Picked, Player Has Buzzed
+- FINAL_ROUND_WAGER: Optional final round, point wager
+- FINAL_ROUND_PROMPT: Optional final round, prompt for solution
+- FINAL_ROUND_DISPLAY: Optional final round, display
 - ENDED: Game Over
 
 NEW -> STARTED -> WAITING_PICK -> DISPLAY_PICK -> BUZZ_READY -> WAITING_PICK ... -> ENDED

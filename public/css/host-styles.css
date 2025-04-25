@@ -60,6 +60,17 @@ ul li:first-of-type {
   margin-bottom: 10px;  
 }
 
+.host-finals {
+  padding: 2px;
+  margin-bottom: 10px;  
+}
+
+.final-item {
+  margin-top: 6px;
+  border: 1px solid #999;
+  padding: 2px;
+}
+
 .buzz-item {
   margin-top: 6px
 }

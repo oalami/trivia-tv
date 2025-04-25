@@ -70,6 +70,19 @@ class Board extends React.Component {
   )}
 }
 
+class FinalsListItem extends React.Component {
+  render() {
+    let disable = this.props.finalItem.disabled;
+
+    return (
+      <div className="final-item">{this.props.playerName}, Wager: {this.props.finalItem.wager}<br/>{this.props.finalItem.solution}<br/>
+          <button className="win-lose" onClick={this.props.onWin} disabled={disable}>WIN</button>
+          <button className="win-lose" onClick={this.props.onLose} disabled={disable}>LOSE</button>
+      </div>
+    );
+  }
+}
+
 class BuzzListItem extends React.Component {  
   render() {
     let disable = this.props.buzzer.disabled;
@@ -92,7 +105,8 @@ class Host extends React.Component {
       players: [],
       selectedPrompt: null,
       picks: [],
-      buzzes: []
+      buzzes: [],
+      finals: []
     };
   }
 
@@ -102,20 +116,23 @@ class Host extends React.Component {
     onChildAdded(playersRef, snap => {
       let players = this.state.players.slice();
       let p = snap.val();
+      let score = p.score || 0;
       
-      players.push({id: snap.key, name: p.name, score:p.score});
+      players.push({id: snap.key, name: p.name, score:score});
+
+      players.sort((a, b) => b.score - a.score);
             
       this.setState({players: players});
     });
 
     onChildRemoved(playersRef, snap => {
-      let players = this.state.players.slice();
-      let p = snap.val();      
+      let oldPlayersList = this.state.players.slice();
+      let p = snap.key;      
+      let removeIndex = oldPlayersList.map(function(item) { return item.id; }).indexOf(p);
 
-      let index = players.indexOf(p);
-      players.splice(index, 1);
+      console.log("Remove Index: " + removeIndex);
 
-      this.setState({players: players});
+      this.setState({players: oldPlayersList.splice(removeIndex, 1)});
     });
 
     onChildChanged(playersRef, snap => {
@@ -126,6 +143,9 @@ class Host extends React.Component {
         if(players[i].id == snap.key) {
           players[i].score = p.score;
           players[i].name = p.name;
+
+          players.sort((a, b) => b.score - a.score);
+
           this.setState({players: players});
           return;
         }
@@ -165,14 +185,44 @@ class Host extends React.Component {
     const buzzesRef = child(gameRef, 'buzzes');
     onChildAdded(buzzesRef, snap => {
       let buzzes = this.state.buzzes.slice();
-      buzzes.push(snap.val());
+      let buzz = snap.val();
+      buzz.buzzId = snap.key;
+      buzzes.push(buzz);
 
       this.setState({buzzes: buzzes});
     });    
 
     onChildRemoved(buzzesRef, snap => {
-      this.setState({buzzes: []});
+      // this.setState({buzzes: []});
     });
+
+    const finalsRef = child(gameRef, 'finals');
+    onChildAdded(finalsRef, snap => {
+      let finals = this.state.finals.slice();
+      let finalItem = snap.val();
+      finalItem.id = snap.key
+      finals.push(finalItem);
+
+      this.setState({finals: finals});  
+    });    
+
+    onChildChanged(finalsRef, snap => {
+      let finals = this.state.finals.slice();
+      let finalItem = snap.val();
+
+      for(var i = 0; i < finals.length ; i++) {
+        if(finals[i].id == snap.key) {
+          finals[i].wager = finalItem.wager;
+          finals[i].solution = finalItem.solution;
+        }
+      }
+
+      this.setState({finals: finals});
+    }); 
+
+    onChildRemoved(finalsRef, snap => {
+      this.setState({finals: []});
+    });    
   }
 
   componentWillUnmount() {
@@ -181,11 +231,13 @@ class Host extends React.Component {
     const gameStateRef = child(gameRef, 'gameState');
     const picksRef = child(gameRef, 'picks');
     const buzzesRef = child(gameRef, 'buzzes');
+    const finalsRef = child(gameRef, 'finals');
     
     off(playersRef);
     off(gameStateRef);
     off(picksRef);
     off(buzzesRef);
+    off(finalsRef);
   }
 
   showSolution() {
@@ -208,6 +260,7 @@ class Host extends React.Component {
     const gameStateRef = child(gameRef, 'gameState');
     
     remove(buzzesRef);
+    this.setState({buzzes: []});
     set(gameStateRef, "WAITING_PICK");
   }
 
@@ -240,7 +293,8 @@ class Host extends React.Component {
   }
 
   handleStartGame() {
-    let enableStartGame = (this.state.status === "NEW" || this.state.status === "ENDED")
+    let displaySolution = this.state.status === "DISPLAY_SOLUTION";
+    let enableStartGame = this.state.status === "NEW" && !displaySolution;
     if(enableStartGame) {
       const gameStateRef = child(gameRef, 'gameState');
       set(gameStateRef, "WAITING_PICK");
@@ -251,12 +305,60 @@ class Host extends React.Component {
         const playersRef = child(gameRef, 'players');
         const buzzesRef = child(gameRef, 'buzzes');
         const gameStateRef = child(gameRef, 'gameState');
+        const finalsRef = child(gameRef, 'finals');
         
         remove(picksRef);
         remove(playersRef);
         remove(buzzesRef);
+        remove(finalsRef);
+        this.setState({players: [], finals: [], buzzes: [], picks: [], selectedPrompt: null});
         set(gameStateRef, "NEW");
       }
+    }
+  }
+
+  handleEndGame() {
+    let end = confirm('End Game?');
+    if(end) {
+      const gameStateRef = child(gameRef, 'gameState');
+      set(gameStateRef, "ENDED");
+    }
+  }
+
+  startTimer(time, endFunction) {
+    this.setState({ timer: time });
+    const timerRef = child(gameRef, 'timer')
+      
+
+    // Clear any existing timer to avoid multiple intervals
+    if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+    }
+
+    // Start a new interval
+    this.timerInterval = setInterval(() => {
+        if (this.state.timer > 0) {            
+            this.setState((prevState) => ({ timer: prevState.timer - 1 }));
+            console.log(`Timer ticked: ${this.state.timer} seconds`);
+            set(timerRef, this.state.timer);
+        } else {
+          clearInterval(this.timerInterval); // Stop the timer when it reaches 0
+          endFunction();
+        }
+    }, 1000); // Tick every second
+}
+
+  handleStartFinalRound() {
+    let startFinal = confirm('Start Final Round?');  //TODO: Don't prompt if there are still points on the board
+    if(startFinal) {
+      const gameStateRef = child(gameRef, 'gameState');
+      set(gameStateRef, "FINAL_ROUND_WAGER");
+      this.startTimer(60, _ => {
+        set(gameStateRef, "FINAL_ROUND_PROMPT");
+        this.startTimer(60, _ => {
+          set(gameStateRef, "FINAL_ROUND_DISPLAY");
+        }); 
+      });
     }
   }
 
@@ -290,6 +392,42 @@ class Host extends React.Component {
     this.setState({selectedPrompt: this.getSelectedPromptFromKey(key)})
   }  
 
+  handleFinalWin(finalItem) {
+    let finals = this.state.finals.slice();
+    let index = finals.indexOf(finalItem);
+    finalItem.disabled = true;
+    finals[index] = finalItem;
+    
+    this.setState({finals: finals})
+
+    let p = this.getPlayerById(finalItem.id);
+    let currentScore = p.score ? parseInt(p.score) : 0;
+    
+    const playersRef = child(child(gameRef, 'players'),finalItem.id);
+    const playerScoreRef = child(playersRef, 'score');
+
+    set(playerScoreRef, currentScore + parseInt(finalItem.wager));
+    remove(child(playersRef, 'wager'));
+  } 
+
+  handleFinalLose(finalItem) {
+    let finals = this.state.finals.slice();
+    let index = finals.indexOf(finalItem);
+    finalItem.disabled = true;
+    finals[index] = finalItem;
+    
+    this.setState({finals: finals})
+
+    let p = this.getPlayerById(finalItem.id);
+    let currentScore = p.score ? parseInt(p.score) : 0;
+    
+    const playersRef = child(child(gameRef, 'players'),finalItem.id);
+    const playerScoreRef = child(playersRef, 'score');
+
+    set(playerScoreRef, currentScore - parseInt(finalItem.wager));
+    remove(child(playersRef, 'wager'));
+  }
+
   handleWin(buzzer) {
     let buzzes = this.state.buzzes.slice();
     let index = buzzes.indexOf(buzzer);
@@ -321,15 +459,21 @@ class Host extends React.Component {
 
     const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');
     set(playerScoreRef, currentScore - parseInt(this.state.selectedPrompt.value));
+
+    remove(child(child(gameRef, 'buzzes'), buzzer.buzzId));
     
-    // gameRef.child('players').child(buzzer.id).child('score').set(currentScore - parseInt(this.state.selectedPrompt.value))    
   }
 
-  renderselectedPrompt() {
+  renderSelectedPrompt() {      
+    if(this.state.status.startsWith("FINAL")) {
+      return;
+    }
+
     if(this.state.selectedPrompt === null) {
-      return (<span>No Selected Question</span>)
+      return (<div className="host-question"><span>No Selected Question</span></div>)
     } else {
       return (
+      <div className="host-question">
         <div>
           <span className="bold">{this.state.selectedPrompt.category}, {this.state.selectedPrompt.value}</span>
           <br/>
@@ -340,6 +484,7 @@ class Host extends React.Component {
           <button className="display-pick" onClick={_ => this.handleDisplayPick(this.state.selectedPrompt.key)} disabled={this.state.status != "WAITING_PICK"}>Display Question</button>
           <button className="display-pick" onClick={_ => this.handleSkipPick(this.state.selectedPrompt.key)} disabled={this.state.status != "BUZZ_READY"}>Skip</button>
         </div>
+      </div>
       );
     }
   }  
@@ -359,7 +504,7 @@ class Host extends React.Component {
           <span className="bold">Buzzers</span>
           { this.state.buzzes.map(buzzer => { 
             return (<BuzzListItem buzzer={buzzer} 
-              key={buzzer.id}
+              key={buzzer.id + "_buzzer"}
               onWin={_ => this.handleWin(buzzer)}
               onLose={_ => this.handleLose(buzzer)}
               />)
@@ -370,8 +515,41 @@ class Host extends React.Component {
     }
   }
 
+  renderFinalsList() {
+    if(this.state.status != "FINAL_ROUND_PROMPT" && this.state.status != "FINAL_ROUND_DISPLAY") {
+      return;
+    }
+
+    if(this.state.finals.length == 0) {
+      return (
+        <div className="host-question">
+          <span className="bold">Finals</span>
+          <br/>Nothing Yet...
+        </div>
+      );
+    }
+    return(
+    <div className="host-finals">
+    <span className="bold">Finals</span>
+    { this.state.finals.map(finalItem => { 
+      let player = this.getPlayerById(finalItem.id);
+
+      return (<FinalsListItem finalItem={finalItem}
+        playerName={player.name} 
+        key={finalItem.id + "_final"}
+        onWin={_ => this.handleFinalWin(finalItem)}
+        onLose={_ => this.handleFinalLose(finalItem)}
+        />)
+    })}
+    </div>);
+
+  }
+
   render() {
-    let enableStartGame = (this.state.status === "NEW" || this.state.status === "ENDED")
+    let displaySolution = this.state.status === "DISPLAY_SOLUTION";
+    let enableStartGame = (this.state.status === "NEW") && !displaySolution;
+    let enableEndGame = !enableStartGame && !displaySolution;
+    let enableFinalRound = !displaySolution && !this.state.status.startsWith("FINAL") && this.state.status != "NEW";
 
 
   	let categories = [];
@@ -384,7 +562,14 @@ class Host extends React.Component {
     		<Board categories={categories} picks={this.state.picks} onSquareClick={key => this.handleSquareClick(key)}/>
 
       		<div className="host-control">
-            <div>Status: {this.state.status} <button onClick={_ => this.handleStartGame() }>{enableStartGame? "Start" : "Reset" }</button></div>
+            <div>Game State: {this.state.status}
+            <br/>
+            <button onClick={_ => this.handleStartGame() }>{enableStartGame? "Start" : "Reset" }</button>
+            &nbsp;
+            <button onClick={_ => this.handleEndGame()} disabled={!enableEndGame}>End Game</button>
+            &nbsp;
+            <button onClick={_ => this.handleStartFinalRound()} disabled={!enableFinalRound}>Start Final Round</button>
+            </div>
 
             <div>
               <ul>
@@ -393,11 +578,10 @@ class Host extends React.Component {
               </ul>        
             </div>
 
-            <div className="host-question">
-              {this.renderselectedPrompt()}
-            </div>
-
+            
+            {this.renderSelectedPrompt()}
             {this.renderBuzzersList()}
+            {this.renderFinalsList()}
       		</div>
       	</div>
     );

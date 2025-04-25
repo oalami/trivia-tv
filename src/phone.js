@@ -5,48 +5,6 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, child, push, set, get, onValue, onChildChanged, onChildAdded } from 'firebase/database';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
-// var firebaseConfig = {
-// 	apiKey: "AIzaSyAlp9TIA0g3j0icy7YZreldkWaSVCJtK18",
-// 	authDomain: "tvquiz-92dd4.firebaseapp.com",
-// 	databaseURL: "https://tvquiz-92dd4.firebaseio.com",
-// 	projectId: "tvquiz-92dd4",
-// 	storageBucket: "tvquiz-92dd4.appspot.com",
-// 	messagingSenderId: "946323037907",
-// };
-
-// var firebaseUser = null;
-// var needRefresh = false;
-
-// function auth() {
-// 	const app = initializeApp(firebaseConfig);
-// 	const auth = getAuth(app);
-	
-// 	onAuthStateChanged(auth, (user) => {
-// 		if (user != null) {
-// 			console.log("Auth state changed " + user.uid);
-// 			if (needRefresh) {
-// 				window.location.reload();
-// 			}
-// 		} else {
-// 			needRefresh = true;
-// 			console.log("Auth state changed NULL");
-// 		}
-
-// 		firebaseUser = user;
-// 	});
-
-// 	signInAnonymously(auth).catch(function (error) {
-// 		// Handle Errors here.
-// 		var errorCode = error.code;
-// 		var errorMessage = error.message;
-
-// 		console.log(errorMessage);
-// 	});
-	
-// 	return getDatabase(app);
-// }
-
-// const db = auth();
 const gameRef = FB.init();
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -98,13 +56,14 @@ class NameEntryScreen extends React.Component {
 	constructor() {
 		super();
 		this.handlePlayButtonClick = this.handlePlayButtonClick.bind(this);
+		this.inputRef = React.createRef();
 	}
 
 	handlePlayButtonClick(e) {
 		e.preventDefault();
 
-		if (this._input.value != "") {
-			this.props.onNamePicked(this._input.value);
+		if (this.inputRef.current.value != "") {
+			this.props.onNamePicked(this.inputRef.current.value);
 		} else {
 			//TODO: Visual indicator that player name required
 		}
@@ -119,13 +78,133 @@ class NameEntryScreen extends React.Component {
 					<input
 						type="text"
 						defaultValue={this.props.name}
-						ref={(c) => (this._input = c)}
+						ref={this.inputRef}
 					/>
 					<button>Let's Play</button>
 				</form>
 			</div>
 		);
 	}
+}
+
+class FinalRoundWager extends React.Component {
+	constructor() {
+		super();
+		this.handleWagerButtonClick = this.handleWagerButtonClick.bind(this);
+	}
+
+	handleWagerButtonClick(e) {
+		e.preventDefault();
+
+		if (this._input.value != "" && this._input.value >= 0 && this._input.value <= this.props.score) {
+			this.props.onWagerPicked(this._input.value);
+			
+		} else {
+			//TODO: Visual indicator of error
+		}
+	}
+
+	render() {
+		let score = this.props.score | 0;
+		let wagerSet = this.props.wagerSet;
+		
+		if (this.props.wagerPicked) {
+			return (
+				<div className="phone-content">
+					<h2>FINAL ROUND</h2>					
+					<h2 className="team-name-final">{this.props.name}: {score} points</h2>					
+					<h2 className="team-name-final">Wager: {this.props.wager} points</h2>	
+				</div>
+			)	
+		}
+
+		return (
+			<div className="phone-content">
+				<form onSubmit={this.handleWagerButtonClick}>
+					<h2>FINAL ROUND</h2>					
+					<h2 className="team-name-final">{this.props.name}: {score} points</h2>					
+					<h2>Enter Wager</h2>
+					<input
+						type="number"
+						defaultValue={score}
+						max={score}
+						min="0"
+						ref={(c) => (this._input = c)}
+					/>
+					<button>Wager</button>
+				</form>
+			</div>
+		);
+	}
+}
+
+class FinalRoundSolution extends React.Component {
+	constructor() {
+		super();
+		this.handleSolutionButtonClick = this.handleSolutionButtonClick.bind(this);
+	}
+
+	handleSolutionButtonClick(e) {
+		e.preventDefault();
+
+		if (this._input.value != "") {
+			this.props.onSolutionPicked(this._input.value);
+		} else {
+			//TODO: Visual indicator of error
+		}
+	}
+
+	render() {
+		let score = this.props.score | 0;
+		if(!this.props.finalRoundSolutionPicked) {
+			return (
+				<div className="phone-content">
+					<form onSubmit={this.handleSolutionButtonClick}>
+						<h2>FINAL ROUND</h2>					
+						<h2 className="team-name-final">{this.props.name}: {score} points</h2>					
+						<h2 className="team-name-final">Wager: {this.props.wager} points</h2>					
+						<h2>Enter Solution</h2>
+						<textarea
+							defaultValue=""
+							ref={(c) => (this._input = c)}
+							rows="4"
+							cols="30"
+						/>
+						<button>Submit Solution</button>
+					</form>
+				</div>
+			);
+		} else {
+			return (
+				<div className="phone-content">
+					<form onSubmit={this.handleSolutionButtonClick}>
+						<h2>FINAL ROUND</h2>					
+						<h2 className="team-name-final">{this.props.name}: {score} points</h2>					
+						<h2 className="team-name-final">Wager: {this.props.wager} points</h2>					
+						<h2>Your Solution</h2>
+						{this.props.finalRoundSolution}
+					</form>
+				</div>
+			);		
+		}
+	}	
+}
+
+class EndGame extends React.Component {
+	constructor() {
+		super();
+	}
+
+	render() {
+		let score = this.props.score | 0;
+		return (
+			<div className="phone-content">				
+				<h1 className="team-name-final">{this.props.name}</h1>
+				<h2 className="team-name-final">{score} points</h2>
+				<h2>Thanks for playing!</h2>
+			</div>
+		);
+	}	
 }
 
 class PlayerControler extends React.Component {
@@ -138,9 +217,15 @@ class PlayerControler extends React.Component {
 			playerId: null,
 			nameSet: false,
 			sentBuzz: false,
+			wager: null,
+			wagerPicked: false,
+			finalRoundSolutionPicked: false,
+			finalRoundSolution: ""
 		};
 
 		this.handleNamePicked = this.handleNamePicked.bind(this);
+		this.handleWagerPicked = this.handleWagerPicked.bind(this);
+		this.handleSolutionPicked = this.handleSolutionPicked.bind(this);
 	}
 
 	componentDidMount() {
@@ -161,6 +246,7 @@ class PlayerControler extends React.Component {
 						playerId: snap.key,
 						playerName: snap.val().name,
 						playerScore: snap.val().score,
+						wager: snap.val().wager
 					};
 				}
 			});
@@ -179,12 +265,28 @@ class PlayerControler extends React.Component {
 		onValue(gameStateRef, (snap) => {
 			let state = {};
 			state.status = snap.val();
-			if (
-				this.state.status != "loading" &&
-				state.status == "NEW" &&
-				this.state.nameSet
-			) {
+
+			if( this.state.status == "NEW") { 
+				this.state = {
+					playerName: "",
+					playerScore: 0,
+					status: "loading",
+					playerId: null,
+					nameSet: false,
+					sentBuzz: false,
+					wager: null,
+					wagerPicked: false,
+					finalRoundSolutionPicked: false,
+					finalRoundSolution: ""
+				};
+			}
+
+			if (this.state.status != "loading" && state.status == "NEW" && this.state.nameSet) {
 				state.nameSet = false;
+			}
+
+			if(!this.state.nameSet && state.status != "NEW" && this.state.playerName != "") {
+				this.handleNamePicked(this.state.playerName);
 			}
 
 			if (state.status != "BUZZ_READY") {
@@ -195,20 +297,46 @@ class PlayerControler extends React.Component {
 		});
 	}
 
-	handleNamePicked(name) {
+	handleNamePicked(pName) {
 		let playerId = this.state.playerId;
 
 		if (playerId != null) {
 			const playerRef = child(child(gameRef, "players"), playerId);
-			set(playerRef, { name: name });
+			set(child(playerRef, "name"), pName);
 		} else {
+
+			console.log("New player: " + pName);
 			const playersRef = child(gameRef, "players");
-			playerId = push(playersRef, { name: name }).key;
+			playerId = push(playersRef, { name: pName }).key;
 
 			document.cookie = "playerId=" + playerId;
 		}
 
-		this.setState({ playerId: playerId, nameSet: true, playerName: name });
+		this.setState({ playerId: playerId, nameSet: true, playerName: pName });
+	}
+
+	handleWagerPicked(wager) {
+		console.log("Wager picked: " + wager);
+		const gameFinalsRef = child(gameRef, "finals");	
+		set(child(child(gameFinalsRef, this.state.playerId), "wager"), wager);
+
+		//store this in the player object as well (in case of a page refresh)
+		const gamePlayersRef = child(gameRef, "players");
+		set(child(child(gamePlayersRef, this.state.playerId),"wager"),wager)
+
+
+		this.setState({ wager: wager });
+		this.setState({ wagerPicked: true })
+	}
+
+	handleSolutionPicked(solution) {
+		console.log("Solution picked: " + solution);
+
+		const gameFinalsRef = child(gameRef, "finals");
+		set(child(child(gameFinalsRef, this.state.playerId), "solution"), solution);
+
+		this.setState({ finalRoundSolution: solution });
+		this.setState({ finalRoundSolutionPicked: true });
 	}
 
 	handleBuzzClick() {
@@ -225,16 +353,42 @@ class PlayerControler extends React.Component {
 	render() {
 		if (this.state.status == "loading") {
 			return <h1>Loading Please Wait</h1>;
-		} else if (
-			!this.state.nameSet &&
-			(this.state.status == "NEW" || this.state.playerName == "")
-		) {
+		} else if ( !this.state.nameSet && (this.state.status == "NEW" || this.state.playerName == "")) {
 			return (
 				<NameEntryScreen
 					onNamePicked={this.handleNamePicked}
 					name={this.state.playerName}
 				/>
 			);
+		} else if( this.state.status == "FINAL_ROUND_WAGER" && this.state.playerScore > 0) {
+			return (
+				<FinalRoundWager
+					onWagerPicked={this.handleWagerPicked}
+					name={this.state.playerName}
+					score={this.state.playerScore}
+					wager={this.state.wager}
+					wagerPicked={this.state.wagerPicked}
+				/>
+			);
+		} else if( this.state.status == "FINAL_ROUND_PROMPT" && this.state.playerScore > 0) {
+			return (
+				<FinalRoundSolution
+					onSolutionPicked={this.handleSolutionPicked}
+					name={this.state.playerName}
+					score={this.state.playerScore}
+					wager={this.state.wager}
+					finalRoundSolutionPicked={this.state.finalRoundSolutionPicked}	
+					finalRoundSolution={this.state.finalRoundSolution}
+				/>
+			);
+		} else if( this.state.status == "ENDED" || this.state.status == "FINAL_ROUND_DISPLAY" || (this.state.status.startsWith("FINAL") && this.state.playerScore <= 0)) {
+			return (
+				<EndGame
+					status={this.state.status}
+					score={this.state.playerScore}
+					name={this.state.playerName}
+				/>
+			);		
 		} else {
 			return (
 				<BuzzerScreen
