@@ -74,13 +74,16 @@ input{
 .final-score-list {
     text-align: left;
     color: white;
-    font-size: 40px;
+    font-size: 32px;
+    font-family: 'Silom';
     column-count: 2;
-    column-gap: 50px;
+    column-gap: 100px;
 }
 
 .final-category-header {
-  padding-top: 150px
+  padding-top: 150px;
+  font-family: 'Silom';
+  font-size: 40px;
 }
 
 .final-category {
@@ -88,8 +91,8 @@ input{
   color: white;
 }
 
-.final-prompt {
-
+.final-title {
+  font-family: 'Silom';
 }
 
 .display-item {

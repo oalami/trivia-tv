@@ -29,14 +29,14 @@ class DisplayCloser extends React.Component {
 		return (
 			<div className="display-item-parent">
 				<div className="display-item-final">
-					<div>Thanks for playing!</div>
+					<div className='final-title'>Thanks for Playing!</div>
 				
 
 				<ul className="final-score-list">
 				{this.props.players.map(p => {
 					let score = p.score || "0";
 					return (
-						<li key={p.name}>{p.name}: {score} {p.wager ? "(wagered " + p.wager + ")": ""} points</li>
+						<li key={p.name}>{p.name}: {score} {p.wager ? "(wagered " + p.wager + ")": ""}</li>
 					)
 				})}		
 				</ul>
@@ -50,7 +50,7 @@ class DisplayFinalRoundWager extends React.Component {
 		return (
 			<div className="display-item-parent">
 				<div className="display-item-final">
-					<div>Final Jeopardy - Enter Wagers!</div>
+					<div className='final-title'>Final Jeopardy - Enter Wagers!</div>
 					<div className="final-category-header">Category</div>
 					<div className="final-category">{this.props.finalRound.category}</div>
 				</div>

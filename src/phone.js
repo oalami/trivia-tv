@@ -116,25 +116,25 @@ class FinalRoundWager extends React.Component {
 					<h2 className="team-name-final">Wager: {this.props.wager} points</h2>	
 				</div>
 			)	
+		} else {
+			return (
+				<div className="phone-content">
+					<form onSubmit={this.handleWagerButtonClick}>
+						<h2>FINAL ROUND</h2>					
+						<h2 className="team-name-final">{this.props.name}: {score} points</h2>					
+						<h2>Enter Wager</h2>
+						<input
+							type="number"
+							defaultValue={score}
+							max={score}
+							min="0"
+							ref={(c) => (this._input = c)}
+						/>
+						<button>Wager</button>
+					</form>
+				</div>
+			);
 		}
-
-		return (
-			<div className="phone-content">
-				<form onSubmit={this.handleWagerButtonClick}>
-					<h2>FINAL ROUND</h2>					
-					<h2 className="team-name-final">{this.props.name}: {score} points</h2>					
-					<h2>Enter Wager</h2>
-					<input
-						type="number"
-						defaultValue={score}
-						max={score}
-						min="0"
-						ref={(c) => (this._input = c)}
-					/>
-					<button>Wager</button>
-				</form>
-			</div>
-		);
 	}
 }
 
@@ -285,9 +285,9 @@ class PlayerControler extends React.Component {
 				state.nameSet = false;
 			}
 
-			if(!this.state.nameSet && state.status != "NEW" && this.state.playerName != "") {
-				this.handleNamePicked(this.state.playerName);
-			}
+			// if(!this.state.nameSet && state.status != "NEW" && this.state.playerName != "") {
+			// 	this.handleNamePicked(this.state.playerName);
+			// }
 
 			if (state.status != "BUZZ_READY") {
 				state.sentBuzz = false;
@@ -353,7 +353,7 @@ class PlayerControler extends React.Component {
 	render() {
 		if (this.state.status == "loading") {
 			return <h1>Loading Please Wait</h1>;
-		} else if ( !this.state.nameSet && (this.state.status == "NEW" || this.state.playerName == "")) {
+		} else if ( !this.state.nameSet ) {
 			return (
 				<NameEntryScreen
 					onNamePicked={this.handleNamePicked}
