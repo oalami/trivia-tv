@@ -34,7 +34,7 @@ class BuzzerScreen extends React.Component {
 				className = "waiting";
 		}
 
-		let score = this.props.score | 0;
+		let score = this.props.score || 0;
 		return (
 			<div
 				className={"phone-content " + className}
@@ -62,8 +62,9 @@ class NameEntryScreen extends React.Component {
 	handlePlayButtonClick(e) {
 		e.preventDefault();
 
-		if (this.inputRef.current.value != "") {
-			this.props.onNamePicked(this.inputRef.current.value);
+		let name = this.inputRef.current.value.trim();
+		if (name != "") {
+			this.props.onNamePicked(name);
 		} else {
 			//TODO: Visual indicator that player name required
 		}
@@ -105,7 +106,7 @@ class FinalRoundWager extends React.Component {
 	}
 
 	render() {
-		let score = this.props.score | 0;
+		let score = this.props.score || 0;
 		let wagerSet = this.props.wagerSet;
 		
 		if (this.props.wagerPicked) {
@@ -155,7 +156,7 @@ class FinalRoundSolution extends React.Component {
 	}
 
 	render() {
-		let score = this.props.score | 0;
+		let score = this.props.score || 0;
 		if(!this.props.finalRoundSolutionPicked) {
 			return (
 				<div className="phone-content">
@@ -196,7 +197,7 @@ class EndGame extends React.Component {
 	}
 
 	render() {
-		let score = this.props.score | 0;
+		let score = this.props.score || 0;
 		return (
 			<div className="phone-content">				
 				<h1 className="team-name-final">{this.props.name}</h1>
@@ -232,8 +233,10 @@ class PlayerControler extends React.Component {
 		let cookieId = 0;
 
 		if (document.cookie) {
-			let uid = document.cookie.split("=")[1];
-			cookieId = uid;
+			let match = document.cookie.split('; ').find(c => c.startsWith('playerId='));
+			if (match) {
+				cookieId = match.split('=')[1];
+			}
 		}
 
 		const playersRef = child(gameRef, "players");
@@ -266,11 +269,10 @@ class PlayerControler extends React.Component {
 			let state = {};
 			state.status = snap.val();
 
-			if( this.state.status == "NEW") { 
-				this.state = {
+			if (state.status == "NEW" && this.state.status != "loading" && this.state.status != "NEW") {
+				this.setState({
 					playerName: "",
 					playerScore: 0,
-					status: "loading",
 					playerId: null,
 					nameSet: false,
 					sentBuzz: false,
@@ -278,11 +280,7 @@ class PlayerControler extends React.Component {
 					wagerPicked: false,
 					finalRoundSolutionPicked: false,
 					finalRoundSolution: ""
-				};
-			}
-
-			if (this.state.status != "loading" && state.status == "NEW" && this.state.nameSet) {
-				state.nameSet = false;
+				});
 			}
 
 			// if(!this.state.nameSet && state.status != "NEW" && this.state.playerName != "") {
@@ -302,7 +300,7 @@ class PlayerControler extends React.Component {
 
 		if (playerId != null) {
 			const playerRef = child(child(gameRef, "players"), playerId);
-			set(child(playerRef, "name"), pName);
+			set(child(playerRef, "name"), pName).catch(console.error);
 		} else {
 
 			console.log("New player: " + pName);
@@ -318,25 +316,23 @@ class PlayerControler extends React.Component {
 	handleWagerPicked(wager) {
 		console.log("Wager picked: " + wager);
 		const gameFinalsRef = child(gameRef, "finals");	
-		set(child(child(gameFinalsRef, this.state.playerId), "wager"), wager);
+		set(child(child(gameFinalsRef, this.state.playerId), "wager"), wager).catch(console.error);
 
 		//store this in the player object as well (in case of a page refresh)
 		const gamePlayersRef = child(gameRef, "players");
-		set(child(child(gamePlayersRef, this.state.playerId),"wager"),wager)
+		set(child(child(gamePlayersRef, this.state.playerId),"wager"),wager).catch(console.error);
 
 
-		this.setState({ wager: wager });
-		this.setState({ wagerPicked: true })
+		this.setState({ wager: wager, wagerPicked: true });
 	}
 
 	handleSolutionPicked(solution) {
 		console.log("Solution picked: " + solution);
 
 		const gameFinalsRef = child(gameRef, "finals");
-		set(child(child(gameFinalsRef, this.state.playerId), "solution"), solution);
+		set(child(child(gameFinalsRef, this.state.playerId), "solution"), solution).catch(console.error);
 
-		this.setState({ finalRoundSolution: solution });
-		this.setState({ finalRoundSolutionPicked: true });
+		this.setState({ finalRoundSolution: solution, finalRoundSolutionPicked: true });
 	}
 
 	handleBuzzClick() {

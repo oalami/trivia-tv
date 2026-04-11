@@ -42,5 +42,7 @@ export const init = function() {
     console.log("Sign in ");
 
     const db = getDatabase(app);
-    return ref(db, "games/game6");
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get('game') || 'game6';
+    return ref(db, "games/" + gameId);
 } 

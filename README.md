@@ -1,38 +1,91 @@
 
+## Trivia TV Game
 
+A trivia party game designed for live group events. Show the game board on a TV, control the game from a host device, and let players buzz in from their phones.
 
-## Triva TV Game
-A trivia party game, designed to be played on a TV with mobile phones as the player buzzers. 
-Built with React and Firebase.
+Built with React and Firebase Realtime Database.
 
-## Features
-- Real-time multiplayer gameplay
-- Mobile phone buzzers
-- TV display for questions and scores
-- Host controls for game management
+## How It Works
 
-## Game State
-- NEW: Game Hasn't Started
-- STARTED: Game Has Started
-- WAITING_PICK: Waiting For Square Pick
-- DISPLAY_PICK: Prompt Picked
-- BUZZ_READY: Prompt Picked, Ready for Buzzing or Prompt Picked, Player Has Buzzed
-- FINAL_ROUND_WAGER: Optional final round, point wager
-- FINAL_ROUND_PROMPT: Optional final round, prompt for solution
-- FINAL_ROUND_DISPLAY: Optional final round, display
-- ENDED: Game Over
+There are three separate interfaces, each opened in its own browser:
 
-NEW -> STARTED -> WAITING_PICK -> DISPLAY_PICK -> BUZZ_READY -> WAITING_PICK ... -> ENDED
+- **TV** (`tv.html`) -- Displays the game board, questions, scores, and timer to the audience.
+- **Host** (`host.html`) -- Controls the game: selects questions, judges answers (win/lose), manages rounds.
+- **Phone** (`phone.html`) -- Players enter a team name and use their phone as a buzzer.
+
+All clients stay in sync in real-time via Firebase.
 
 ## Getting Started
-1. Install dependencies: `npm install`
-2. Compile the app: `npm run compile` (development mode `npm run dev`)
-3. Start the server: `npm start`
-4. Open the game in your browser:
-   - Host view: `http://localhost:3000/host.html`
-   - TV view: `http://localhost:3000/tv.html`
-   - Player view: `http://localhost:3000/phone.html` 
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+2. Start the dev server (with hot rebuild):
+   ```
+   npm run dev
+   ```
+3. Open each interface in a browser (all on `http://localhost:3000`):
+   - Host: `http://localhost:3000/host.html`
+   - TV: `http://localhost:3000/tv.html`
+   - Players: `http://localhost:3000/phone.html`
+
+### Production Build and Deploy
+
+```
+npm run compile       # build bundles
+npm start             # start server (production mode)
+firebase deploy       # deploy to Firebase Hosting
+```
+
+### Custom Game ID
+
+By default the game uses the `game6` reference in Firebase. You can use a different game by adding a `?game=` query parameter to all three URLs:
+
+```
+http://localhost:3000/tv.html?game=myGame
+http://localhost:3000/host.html?game=myGame
+http://localhost:3000/phone.html?game=myGame
+```
+
+## Game Flow
+
+```
+NEW -> WAITING_PICK -> DISPLAY_PICK -> BUZZ_READY -> WAITING_PICK -> ... -> ENDED
+                                                         \
+                                          FINAL_ROUND_WAGER -> FINAL_ROUND_PROMPT -> FINAL_ROUND_DISPLAY -> ENDED
+```
+
+| State | Description |
+|-------|-------------|
+| `NEW` | Lobby. Players join, host hasn't started yet. |
+| `WAITING_PICK` | Host selects a question from the board. |
+| `DISPLAY_PICK` | Question is shown on the TV. |
+| `BUZZ_READY` | Players can buzz in. Host judges answers. |
+| `DISPLAY_SOLUTION` | Solution is briefly shown on TV. |
+| `FINAL_ROUND_WAGER` | Players enter a point wager (60s timer). |
+| `FINAL_ROUND_PROMPT` | Players submit their answer (60s timer). |
+| `FINAL_ROUND_DISPLAY` | Final scores displayed. |
+| `ENDED` | Game over. |
+
+## Project Structure
+
+```
+src/
+  fb.js        -- Firebase initialization and auth
+  host.js      -- Host control UI (React)
+  tv.js        -- TV display UI (React)
+  phone.js     -- Mobile buzzer UI (React)
+public/
+  host.html    -- Host page
+  tv.html      -- TV display page
+  phone.html   -- Player page
+  css/         -- Stylesheets
+  js/          -- Compiled bundles (output of webpack)
+quiz.json      -- Sample question data
+server.js      -- Express dev server
+```
 
 ## License
-This library is licensed under the The MIT License. Full license text is
-available in [LICENSE](LICENSE).
+
+This library is licensed under the MIT License. Full license text is available in [LICENSE](LICENSE).

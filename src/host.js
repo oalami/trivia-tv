@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import * as FB from './fb.js';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onChildAdded, onChildRemoved, onChildChanged, onValue, get, set, remove, off, query, limitToLast, push, child } from 'firebase/database';
+import { getDatabase, ref, onChildAdded, onChildRemoved, onChildChanged, onValue, get, set, remove, query, limitToLast, push, child } from 'firebase/database';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const gameRef = FB.init();
@@ -111,9 +111,10 @@ class Host extends React.Component {
   }
 
   componentDidMount() {
+    this.unsubscribers = [];
     const playersRef = child(gameRef, 'players');
-    
-    onChildAdded(playersRef, snap => {
+
+    this.unsubscribers.push(onChildAdded(playersRef, snap => {
       let players = this.state.players.slice();
       let p = snap.val();
       let score = p.score || 0;
@@ -123,23 +124,23 @@ class Host extends React.Component {
       players.sort((a, b) => b.score - a.score);
             
       this.setState({players: players});
-    });
+    }));
 
-    onChildRemoved(playersRef, snap => {
+    this.unsubscribers.push(onChildRemoved(playersRef, snap => {
       let oldPlayersList = this.state.players.slice();
       let p = snap.key;      
       let removeIndex = oldPlayersList.map(function(item) { return item.id; }).indexOf(p);
 
       console.log("Remove Index: " + removeIndex);
 
-      this.setState({players: oldPlayersList.splice(removeIndex, 1)});
-    });
+      this.setState({players: oldPlayersList.filter((_, i) => i !== removeIndex)});
+    }));
 
-    onChildChanged(playersRef, snap => {
+    this.unsubscribers.push(onChildChanged(playersRef, snap => {
       let players = this.state.players.slice();
       let p = snap.val();      
 
-      for(var i = 0; players.length ; i++) {
+      for(var i = 0; i < players.length ; i++) {
         if(players[i].id == snap.key) {
           players[i].score = p.score;
           players[i].name = p.name;
@@ -149,64 +150,64 @@ class Host extends React.Component {
           this.setState({players: players});
           return;
         }
-      }      
-    });
+      }
+    }));
 
     const boardRef = child(gameRef, 'board');
     get(boardRef).then(snap => {
       this.setState({board: snap.val()});
 
       const gameStateRef = child(gameRef, 'gameState');
-      onValue(gameStateRef, snap => {      
+      this.unsubscribers.push(onValue(gameStateRef, snap => {
         let state = {};
         state.status = snap.val();
 
         this.setState(state);
-      });
+      }));
 
       const picksLimitRef = query(child(gameRef, 'picks'), limitToLast(1));
-      onChildAdded(picksLimitRef, snap => {
+      this.unsubscribers.push(onChildAdded(picksLimitRef, snap => {
         this.setState({selectedPrompt: this.getSelectedPromptFromKey(snap.val())})
-      });
+      }));
     });
 
     const picksRef = child(gameRef, 'picks');
-    onChildAdded(picksRef, snap => {
+    this.unsubscribers.push(onChildAdded(picksRef, snap => {
       let picks = this.state.picks.slice();
 
       picks.push(snap.val());
       this.setState({picks: picks});
-    });
+    }));
 
-    onChildRemoved(picksRef, snap => {      
+    this.unsubscribers.push(onChildRemoved(picksRef, snap => {
       this.setState({picks: []});
-    });
+    }));
 
     const buzzesRef = child(gameRef, 'buzzes');
-    onChildAdded(buzzesRef, snap => {
+    this.unsubscribers.push(onChildAdded(buzzesRef, snap => {
       let buzzes = this.state.buzzes.slice();
       let buzz = snap.val();
       buzz.buzzId = snap.key;
       buzzes.push(buzz);
 
       this.setState({buzzes: buzzes});
-    });    
+    }));
 
-    onChildRemoved(buzzesRef, snap => {
+    this.unsubscribers.push(onChildRemoved(buzzesRef, snap => {
       // this.setState({buzzes: []});
-    });
+    }));
 
     const finalsRef = child(gameRef, 'finals');
-    onChildAdded(finalsRef, snap => {
+    this.unsubscribers.push(onChildAdded(finalsRef, snap => {
       let finals = this.state.finals.slice();
       let finalItem = snap.val();
       finalItem.id = snap.key
       finals.push(finalItem);
 
-      this.setState({finals: finals});  
-    });    
+      this.setState({finals: finals});
+    }));
 
-    onChildChanged(finalsRef, snap => {
+    this.unsubscribers.push(onChildChanged(finalsRef, snap => {
       let finals = this.state.finals.slice();
       let finalItem = snap.val();
 
@@ -218,26 +219,15 @@ class Host extends React.Component {
       }
 
       this.setState({finals: finals});
-    }); 
+    }));
 
-    onChildRemoved(finalsRef, snap => {
+    this.unsubscribers.push(onChildRemoved(finalsRef, snap => {
       this.setState({finals: []});
-    });    
+    }));
   }
 
   componentWillUnmount() {
-    // Unsubscribe from Firebase listeners
-    const playersRef = child(gameRef, 'players');
-    const gameStateRef = child(gameRef, 'gameState');
-    const picksRef = child(gameRef, 'picks');
-    const buzzesRef = child(gameRef, 'buzzes');
-    const finalsRef = child(gameRef, 'finals');
-    
-    off(playersRef);
-    off(gameStateRef);
-    off(picksRef);
-    off(buzzesRef);
-    off(finalsRef);
+    this.unsubscribers.forEach(unsub => unsub());
   }
 
   showSolution() {
@@ -307,12 +297,12 @@ class Host extends React.Component {
         const gameStateRef = child(gameRef, 'gameState');
         const finalsRef = child(gameRef, 'finals');
         
-        remove(picksRef);
-        remove(playersRef);
-        remove(buzzesRef);
-        remove(finalsRef);
+        remove(picksRef).catch(console.error);
+        remove(playersRef).catch(console.error);
+        remove(buzzesRef).catch(console.error);
+        remove(finalsRef).catch(console.error);
         this.setState({players: [], finals: [], buzzes: [], picks: [], selectedPrompt: null});
-        set(gameStateRef, "NEW");
+        set(gameStateRef, "NEW").catch(console.error);
       }
     }
   }
@@ -406,9 +396,9 @@ class Host extends React.Component {
     const playersRef = child(child(gameRef, 'players'),finalItem.id);
     const playerScoreRef = child(playersRef, 'score');
 
-    set(playerScoreRef, currentScore + parseInt(finalItem.wager));
-    remove(child(playersRef, 'wager'));
-  } 
+    set(playerScoreRef, currentScore + parseInt(finalItem.wager)).catch(console.error);
+    remove(child(playersRef, 'wager')).catch(console.error);
+  }
 
   handleFinalLose(finalItem) {
     let finals = this.state.finals.slice();
@@ -424,8 +414,8 @@ class Host extends React.Component {
     const playersRef = child(child(gameRef, 'players'),finalItem.id);
     const playerScoreRef = child(playersRef, 'score');
 
-    set(playerScoreRef, currentScore - parseInt(finalItem.wager));
-    remove(child(playersRef, 'wager'));
+    set(playerScoreRef, currentScore - parseInt(finalItem.wager)).catch(console.error);
+    remove(child(playersRef, 'wager')).catch(console.error);
   }
 
   handleWin(buzzer) {
@@ -439,8 +429,8 @@ class Host extends React.Component {
     let p = this.getPlayerById(buzzer.id);
     let currentScore = p.score ? parseInt(p.score) : 0;
 
-    const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');     
-    set(playerScoreRef, currentScore + parseInt(this.state.selectedPrompt.value));
+    const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');
+    set(playerScoreRef, currentScore + parseInt(this.state.selectedPrompt.value)).catch(console.error);
 
     this.showSolution();
   }
@@ -458,9 +448,9 @@ class Host extends React.Component {
     let currentScore = p.score ? parseInt(p.score) : 0;
 
     const playerScoreRef = child(child(child(gameRef, 'players'), buzzer.id), 'score');
-    set(playerScoreRef, currentScore - parseInt(this.state.selectedPrompt.value));
+    set(playerScoreRef, currentScore - parseInt(this.state.selectedPrompt.value)).catch(console.error);
 
-    remove(child(child(gameRef, 'buzzes'), buzzer.buzzId));
+    remove(child(child(gameRef, 'buzzes'), buzzer.buzzId)).catch(console.error);
     
   }
 

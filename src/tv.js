@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as FB from './fb.js';
-import { getDatabase, ref, child, onChildAdded, onChildRemoved, onChildChanged, onValue, get, off } from 'firebase/database';
+import { getDatabase, ref, child, onChildAdded, onChildRemoved, onChildChanged, onValue, get } from 'firebase/database';
 
 const gameRef = FB.init();
 
@@ -193,9 +193,10 @@ class TV extends React.Component {
 	}
 
 	componentDidMount() {
-		const playersRef = child(gameRef, 'players');		
+		this.unsubscribers = [];
+		const playersRef = child(gameRef, 'players');
 
-		onChildAdded(playersRef, snap => {
+		this.unsubscribers.push(onChildAdded(playersRef, snap => {
 			let players = this.state.players.slice();
 			let p = snap.val();
 			let score = p.score || 0;
@@ -205,23 +206,18 @@ class TV extends React.Component {
 			players.sort((a, b) => b.score - a.score);
 
 			this.setState({ players: players });
-		});
+		}));
 
-		onChildRemoved(playersRef, snap => {
-			let players = this.state.players.slice();
-			let p = snap.val();
-
-			let index = players.indexOf(p);
-			players.splice(index, 1);
-
+		this.unsubscribers.push(onChildRemoved(playersRef, snap => {
+			let players = this.state.players.filter(p => p.id !== snap.key);
 			this.setState({ players: players });
-		});
+		}));
 
-		onChildChanged(playersRef, snap => {
+		this.unsubscribers.push(onChildChanged(playersRef, snap => {
 			let players = this.state.players.slice();
 			let p = snap.val();
 
-			for (var i = 0; players.length; i++) {
+			for (var i = 0; i < players.length; i++) {
 				if (players[i].id == snap.key) {
 					players[i].score = p.score;
 					players[i].name = p.name;
@@ -233,22 +229,22 @@ class TV extends React.Component {
 					return;
 				}
 			}
-		});
+		}));
 
 		const boardRef = child(gameRef, 'board');
 		get(boardRef).then(snap => {
 			this.setState({ board: snap.val() });
 
 			const gameStateRef = child(gameRef, 'gameState');
-			onValue(gameStateRef, snap => {
+			this.unsubscribers.push(onValue(gameStateRef, snap => {
 				let state = {};
 				state.status = snap.val();
 
 				this.setState(state);
-			});
+			}));
 
 			const picksRef = child(gameRef, 'picks');
-			onChildAdded(picksRef, snap => {
+			this.unsubscribers.push(onChildAdded(picksRef, snap => {
 				let pick = snap.val();
 				let picks = this.state.picks.slice();
 				picks.push(pick);
@@ -256,21 +252,21 @@ class TV extends React.Component {
 				let sq = this.getSelectedPromptFromKey(pick);
 
 				this.setState({ picks: picks, selectedPrompt: sq });
-			});
+			}));
 
-			onChildRemoved(picksRef, snap => {
+			this.unsubscribers.push(onChildRemoved(picksRef, snap => {
 				this.setState({ picks: [] });
-			});
+			}));
 
 			const buzzesRef = child(gameRef, 'buzzes');
-			onChildAdded(buzzesRef, snap => {
+			this.unsubscribers.push(onChildAdded(buzzesRef, snap => {
 				let buzzes = this.state.buzzes.slice();
 				buzzes.push(snap.val());
 
 				this.setState({ buzzes: buzzes });
-			});
+			}));
 
-			onChildRemoved(buzzesRef, snap => {
+			this.unsubscribers.push(onChildRemoved(buzzesRef, snap => {
 				let buzzes = this.state.buzzes.slice();
 
 				for(var i = 0; i < buzzes.length; i++) {
@@ -281,13 +277,13 @@ class TV extends React.Component {
 				}
 
 				this.setState({ buzzes: buzzes });
-			});
+			}));
 
-			onValue(buzzesRef, snap => {
+			this.unsubscribers.push(onValue(buzzesRef, snap => {
 				if (snap.val() == null) {
 					this.setState({ buzzes: [] });
 				}
-			});
+			}));
 		});
 
 		const finalRoundRef = child(gameRef, 'finalRound');
@@ -299,7 +295,7 @@ class TV extends React.Component {
 		});
 
 		const timerRef = child(gameRef, 'timer');
-		onValue(timerRef, snap => {
+		this.unsubscribers.push(onValue(timerRef, snap => {
 			let timer = snap.val();
 			let timerDuration = this.state.timerDuration
 			if(timer > timerDuration) {
@@ -311,25 +307,11 @@ class TV extends React.Component {
 			} else {
 				this.setState({ timer: timer });
 			}
-			
-		});
+		}));
 	}
 
 	componentWillUnmount() {
-		const playersRef = child(gameRef, 'players');
-		const gameStateRef = child(gameRef, 'gameState');
-		const picksRef = child(gameRef, 'picks');
-		const buzzesRef = child(gameRef, 'buzzes');
-		const finalRoundRef = child(gameRef, 'finalRound');
-		const timerRef = child(gameRef, 'timer');
-		
-
-		off(playersRef);
-		off(gameStateRef);
-		off(picksRef);
-		off(buzzesRef);
-		off(finalRoundRef);
-		off(timerRef);
+		this.unsubscribers.forEach(unsub => unsub());
 	}
 
 	getSelectedPromptFromKey(key) {
