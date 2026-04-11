@@ -11,13 +11,15 @@ const config = {
   messagingSenderId: "946323037907"
 }; 
 
+let firebaseAuth = null;
+
 export const init = function() {
     const app = initializeApp(config);
     const auth = getAuth(app);
-    
+    firebaseAuth = auth;
+
     let needRefresh = false;
-    let firebaseUser = null;
-    
+
     onAuthStateChanged(auth, (user) => {
 		if (user != null) {
 			console.log("Auth state changed " + user.uid);
@@ -28,12 +30,9 @@ export const init = function() {
 			needRefresh = true;
 			console.log("Auth state changed NULL");
 		}
-
-		firebaseUser = user;
 	});
-    
+
     signInAnonymously(auth).catch(function(error) {
-    // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
       console.log(errorMessage + " " +errorCode);
@@ -43,6 +42,10 @@ export const init = function() {
 
     const db = getDatabase(app);
     const params = new URLSearchParams(window.location.search);
-    const gameId = params.get('game') || 'game6';
+    const gameId = params.get('game') || 'game7';
     return ref(db, "games/" + gameId);
+}
+
+export const getAuthUid = function() {
+    return firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser.uid : null;
 } 

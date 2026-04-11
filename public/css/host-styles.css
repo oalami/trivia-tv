@@ -111,3 +111,38 @@ button.display-pick {
   padding-left: 20px;
   display: block
 }
+
+.sheet-import {
+  border: 1px solid #999;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.sheet-import input {
+  display: block;
+  width: calc(100% - 10px);
+  margin: 4px 0;
+  padding: 4px;
+}
+
+.sheet-import button {
+  margin-top: 4px;
+}
+
+.sheet-error {
+  color: red;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.sheet-warning {
+  color: #b8860b;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.sheet-success {
+  color: green;
+  margin-top: 4px;
+  font-size: 12px;
+}
