@@ -40,13 +40,26 @@ firebase deploy       # deploy to Firebase Hosting
 
 ### Custom Game ID
 
-By default the game uses the `game6` reference in Firebase. You can use a different game by adding a `?game=` query parameter to all three URLs:
+By default the game uses the `game7` reference in Firebase. You can use a different game by adding a `?game=` query parameter to all three URLs:
 
 ```
 http://localhost:3000/tv.html?game=myGame
 http://localhost:3000/host.html?game=myGame
 http://localhost:3000/phone.html?game=myGame
 ```
+
+If the game node doesn't exist yet in Firebase, the host will bootstrap it automatically.
+
+## Loading Questions from Google Sheets
+
+Instead of manually loading questions into Firebase, the host can import them directly from a Google Sheet:
+
+1. Create a Google Sheet with columns: **Category**, **Answer** (the prompt shown to players), **Question** (the solution).
+2. Group 5 rows per category. Add a row with category "Final Jeopardy Round" for the final round.
+3. Share the sheet publicly (Anyone with the link).
+4. On the host page (when game state is `NEW`), paste the sheet URL and tab name, then click **Load Questions**.
+
+Point values (100-500) are assigned automatically by row order within each category. The first 5 categories are used.
 
 ## Game Flow
 

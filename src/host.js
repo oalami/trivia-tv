@@ -7,17 +7,6 @@ import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const gameRef = FB.init();
 
-function claimHost() {
-  let uid = FB.getAuthUid();
-  if (!uid) return Promise.resolve();
-  const hostUidRef = child(gameRef, 'hostUid');
-  return get(hostUidRef).then(snap => {
-    if (!snap.exists()) {
-      return set(hostUidRef, uid);
-    }
-  }).catch(console.error);
-}
-
 class Square extends React.Component {
   render() {
     return (
@@ -398,7 +387,6 @@ class Host extends React.Component {
 
         let result = this.transformSheetToBoard(rows);
 
-        return claimHost().then(() => {
         const boardRef = child(gameRef, 'board');
         const finalRoundRef = child(gameRef, 'finalRound');
 
@@ -410,7 +398,6 @@ class Host extends React.Component {
         return Promise.all(writes).then(() => {
           let warnings = result.warnings.length > 0 ? result.warnings.join('; ') : null;
           this.setState({ sheetLoading: false, board: result.board, sheetError: warnings ? 'Warnings: ' + warnings : null });
-        });
         });
       })
       .catch(err => {
@@ -474,10 +461,8 @@ class Host extends React.Component {
     let displaySolution = this.state.status === "DISPLAY_SOLUTION";
     let enableStartGame = this.state.status === "NEW" && !displaySolution;
     if(enableStartGame) {
-      claimHost().then(() => {
-        const gameStateRef = child(gameRef, 'gameState');
-        set(gameStateRef, "WAITING_PICK");
-      });
+      const gameStateRef = child(gameRef, 'gameState');
+      set(gameStateRef, "WAITING_PICK");
     } else {
       let reset = confirm('Reset Game?');
       if(reset) {
@@ -486,13 +471,11 @@ class Host extends React.Component {
         const buzzesRef = child(gameRef, 'buzzes');
         const gameStateRef = child(gameRef, 'gameState');
         const finalsRef = child(gameRef, 'finals');
-        const hostUidRef = child(gameRef, 'hostUid');
 
         remove(picksRef).catch(console.error);
         remove(playersRef).catch(console.error);
         remove(buzzesRef).catch(console.error);
         remove(finalsRef).catch(console.error);
-        remove(hostUidRef).catch(console.error);
         this.setState({players: [], finals: [], buzzes: [], picks: [], selectedPrompt: null});
         set(gameStateRef, "NEW").catch(console.error);
       }

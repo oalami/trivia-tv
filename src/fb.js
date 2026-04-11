@@ -11,12 +11,9 @@ const config = {
   messagingSenderId: "946323037907"
 }; 
 
-let firebaseAuth = null;
-
 export const init = function() {
     const app = initializeApp(config);
     const auth = getAuth(app);
-    firebaseAuth = auth;
 
     let needRefresh = false;
 
@@ -46,6 +43,4 @@ export const init = function() {
     return ref(db, "games/" + gameId);
 }
 
-export const getAuthUid = function() {
-    return firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser.uid : null;
-} 
+ 

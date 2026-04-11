@@ -3,24 +3,20 @@
     "games": {
       "$game": {
         ".read": "auth != null",
-        "hostUid": {
-          ".write": "auth != null",
-          ".validate": "newData.isString()"
-        },
         "board": {
-          ".write": "auth != null && data.parent().child('hostUid').val() == auth.uid"
+          ".write": "auth != null"
         },
         "finalRound": {
-          ".write": "auth != null && data.parent().child('hostUid').val() == auth.uid"
+          ".write": "auth != null"
         },
         "gameState": {
-          ".write": "auth != null && data.parent().child('hostUid').val() == auth.uid"
+          ".write": "auth != null"
         },
         "picks": {
-          ".write": "auth != null && data.parent().child('hostUid').val() == auth.uid"
+          ".write": "auth != null"
         },
         "timer": {
-          ".write": "auth != null && data.parent().child('hostUid').val() == auth.uid"
+          ".write": "auth != null"
         },
         "players": {
           ".write": "auth != null",
