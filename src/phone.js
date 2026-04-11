@@ -267,7 +267,7 @@ class PlayerControler extends React.Component {
 		const gameStateRef = child(gameRef, "gameState");
 		onValue(gameStateRef, (snap) => {
 			let state = {};
-			state.status = snap.val();
+			state.status = snap.val() || "NEW";
 
 			if (state.status == "NEW" && this.state.status != "loading" && this.state.status != "NEW") {
 				this.setState({

@@ -233,12 +233,12 @@ class TV extends React.Component {
 
 		const boardRef = child(gameRef, 'board');
 		get(boardRef).then(snap => {
-			this.setState({ board: snap.val() });
+			this.setState({ board: snap.val() || [] });
 
 			const gameStateRef = child(gameRef, 'gameState');
 			this.unsubscribers.push(onValue(gameStateRef, snap => {
 				let state = {};
-				state.status = snap.val();
+				state.status = snap.val() || "NEW";
 
 				this.setState(state);
 			}));
