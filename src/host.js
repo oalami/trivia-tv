@@ -295,6 +295,7 @@ class Host extends React.Component {
     let categoryOrder = [];
     let finalRound = null;
     let warnings = [];
+    let nextRowIsFinal = false;
 
     for (let row of dataRows) {
       let category = (row[catIdx] || '').trim();
@@ -303,9 +304,16 @@ class Host extends React.Component {
 
       if (!category) continue;
 
+      if (nextRowIsFinal) {
+        finalRound = { category: category, prompt: answer || question };
+        nextRowIsFinal = false;
+        continue;
+      }
+
       if (category.toLowerCase().includes('final')) {
         if (!answer && !question) {
-          warnings.push('Final round row has no prompt');
+          // Section header row (e.g. "Final Jeopardy Round") — real data is next row
+          nextRowIsFinal = true;
         } else {
           finalRound = { category: category, prompt: answer || question };
         }
@@ -338,11 +346,7 @@ class Host extends React.Component {
       }
     }
 
-    if (categoryOrder.length > 5) {
-      warnings.push('Found ' + categoryOrder.length + ' categories, using first 5');
-    }
-
-    let board = categoryOrder.slice(0, 5).map(cat => {
+    let board = categoryOrder.map(cat => {
       let items = {};
       let q = {};
       let values = [100, 200, 300, 400, 500];
